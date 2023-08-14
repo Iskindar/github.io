@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iskindar.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="BovInspector：一个自动化验证缓冲区溢出漏洞的工具前言静态分析工具可以很全面地检测软件，但是误报率也很高。人工地去验证这些静态分析报告是费时费力的过程。BovInspector可以去自动化地验证静态分析找出的缓冲区溢出漏洞。本文将介绍BovInspector的基本原理，安装使用方法。 1.简介BovInspector来源于2020年期刊 Journal of Computer Scien">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BovInspector：一个自动化验证缓冲区溢出漏洞的工具">
+<meta property="og:url" content="http://iskindar.github.io/2021/06/01/BovInspector/index.html">
+<meta property="og:site_name" content="iskindar的博客">
+<meta property="og:description" content="BovInspector：一个自动化验证缓冲区溢出漏洞的工具前言静态分析工具可以很全面地检测软件，但是误报率也很高。人工地去验证这些静态分析报告是费时费力的过程。BovInspector可以去自动化地验证静态分析找出的缓冲区溢出漏洞。本文将介绍BovInspector的基本原理，安装使用方法。 1.简介BovInspector来源于2020年期刊 Journal of Computer Scien">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503112111595.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503190438707.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503190756936.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503193633408.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503192324877.png">
+<meta property="article:published_time" content="2021-06-01T07:30:10.000Z">
+<meta property="article:modified_time" content="2023-08-14T07:45:50.492Z">
+<meta property="article:author" content="iskindar">
+<meta property="article:tag" content="symbolic execution">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503112111595.png">
+
+<link rel="canonical" href="http://iskindar.github.io/2021/06/01/BovInspector/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>BovInspector：一个自动化验证缓冲区溢出漏洞的工具 | iskindar的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9a79db5615c4a0bf77e512dd81c44895";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">iskindar的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Into the Night !</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/iskindar" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2021/06/01/BovInspector/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          BovInspector：一个自动化验证缓冲区溢出漏洞的工具
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-01 15:30:10" itemprop="dateCreated datePublished" datetime="2021-06-01T15:30:10+08:00">2021-06-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 15:45:50" itemprop="dateModified" datetime="2023-08-14T15:45:50+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="BovInspector：一个自动化验证缓冲区溢出漏洞的工具"><a href="#BovInspector：一个自动化验证缓冲区溢出漏洞的工具" class="headerlink" title="BovInspector：一个自动化验证缓冲区溢出漏洞的工具"></a>BovInspector：一个自动化验证缓冲区溢出漏洞的工具</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>静态分析工具可以很全面地检测软件，但是误报率也很高。人工地去验证这些静态分析报告是费时费力的过程。BovInspector可以去自动化地验证静态分析找出的缓冲区溢出漏洞。本文将介绍BovInspector的基本原理，安装使用方法。</p>
+<h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1.简介"></a>1.简介</h2><p>BovInspector来源于2020年期刊 Journal of Computer Science and Technology的一篇文章《Automatic Buffer Overflow Warning Validation》，最早是16年软工A类会议ASE上的一篇short paper。</p>
+<p>该工具主要是基于KLEE，实现了一个自动验证静态分析报告的工具。换个角度看，也有点像利用静态分析来减少符号执行的路径爆炸问题的工作。</p>
+<h2 id="2-原理"><a href="#2-原理" class="headerlink" title="2.原理"></a>2.原理</h2><p>工具的基本框架如下图所示（下图来源于论文）。主要工作有以下3点：</p>
+<p>a. Warning Reachability Analysis（基于LLVM的PASS实现）</p>
+<p>b.Guided Symbolic Execution（基于KLEE实现）</p>
+<p>c. Targeted Automatic Repair Suggestions（Python脚本）</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503112111595.png" alt="image-20210503112111595"></p>
+<p>下面将主要对Warning Reachability Analysis和Guided Symbolic Execution做重点介绍，并简单介绍自动修补。</p>
+<h3 id="2-1-Warning-Reachability-Analysis"><a href="#2-1-Warning-Reachability-Analysis" class="headerlink" title="2.1 Warning Reachability Analysis"></a>2.1 Warning Reachability Analysis</h3><p>这部分工作主要是确认静态分析找出的缓冲区溢出是否存在一条路径到达程序入口。首先，这部分内容的输入主要有两个，一个是源码，一个是buffer overflow warning。</p>
+<p>buffer overflow warning用一个三元组表示(d,[l1,l2,…,ln],o)​，其中<em>d</em>表示buf定义的行号，l1,l2,…,ln表示对buf操作的行号，o表示溢出点。</p>
+<p>由于静态分析工具检测的漏洞有可能在路径上是不可达的，因此，作者打算先过滤掉从程序入口到达不了的漏洞警告。具体来说，作者写了一个llvm pass先构建控制流图，再基于调用关系构建过程间的控制流图。然后在过程间的控制流图上，从漏洞点出发，往上追溯buf操作的语句，如果能够追溯到程序入口，说明这个漏洞有可能被触发。</p>
+<p>这部分源码主要包含以下组件，核心是buildCFG.cpp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">|-- CFGWriter.h //打印CFG</span><br><span class="line">|-- ReverseSearchPath.cpp//逆向搜索路径</span><br><span class="line">|-- ReverseSearchPath.h</span><br><span class="line">|-- buildCFG.cpp //warning reachability analysis的核心</span><br><span class="line">|-- convinent.cpp//包含一些方便的函数，比如获取行号，获取源文件名等等</span><br><span class="line">|-- convinent.h</span><br><span class="line">|-- mylib</span><br><span class="line">|   `-- printSTL.h</span><br><span class="line">|-- programCFG.cpp//构建过程间控制流图</span><br><span class="line">|-- programCFG.h</span><br><span class="line">|-- targetPosition.cpp//将缓冲区溢出警告里的行号映射为基本块</span><br><span class="line">`-- targetPosition.h</span><br></pre></td></tr></table></figure>
+
+<p>下面这段是buildCFG.cpp的主要代码，首先构建过程间控制流图（line 4）。</p>
+<p>然后基于buffer overflow warning的信息，去获取buf定义、操作、溢出的行号在哪些基本块里（line 5-7）。也就是targetPosition.cpp里的逻辑。</p>
+<p>接着从溢出点的基本块和离溢出最近的一个buf操作的基本块开始，搜索这两个基本块的路径（ReverseSearchPath.cpp），直到遍历完所有的target point。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> <span class="title function_">buildCFG::doInitialization</span><span class="params">(Module &amp;M)</span>&#123; </span><br><span class="line"></span><br><span class="line">	errs()&lt;&lt;<span class="string">&quot;build programCFG-------------------------------------------------------------------\n&quot;</span>;</span><br><span class="line">	new ProgramCFG(M);</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">pair</span>&lt;BasicBlock*,BasicBlock*&gt; &gt; *target_point=<span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">if</span>(!targetListFileName.empty())</span><br><span class="line">		target_point=getTargetPoint(targetListFileName,M);</span><br><span class="line">	errs()&lt;&lt;target_point-&gt;size()&lt;&lt;<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	<span class="keyword">if</span>(target_point-&gt;size()!=<span class="number">0</span>)&#123;</span><br><span class="line">		errs()&lt;&lt;<span class="string">&quot;the path number is  &quot;</span>&lt;&lt;target_point-&gt;size()&lt;&lt;<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">		<span class="keyword">for</span>(<span class="type">unsigned</span> <span class="type">int</span> i=<span class="number">0</span>;i&lt;target_point-&gt;size();i++)&#123;</span><br><span class="line">			Function *main = M.getFunction(<span class="string">&quot;main&quot;</span>);</span><br><span class="line">			SearchReversePaths(target_point-&gt;at(i).first,target_point-&gt;at(i).second,&amp;main-&gt;getEntryBlock(),M,i);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> errs()&lt;&lt;<span class="string">&quot;No valid path in checklist!!&quot;</span>&lt;&lt;<span class="string">&quot;\n&quot;</span>;</span><br><span class="line"> 	<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-Guided-Symbolic-Execution"><a href="#2-2-Guided-Symbolic-Execution" class="headerlink" title="2.2 Guided Symbolic Execution"></a>2.2 Guided Symbolic Execution</h3><p>指导符号执行的目的是验证缓冲区溢出漏洞是否可以被触发。整个流程大致如下图所示。首先，从执行状态池里选择一个状态。接着，执行指令，如果执行到漏洞点，调用验证模块，检测一下当前的状态是否满足漏洞的约束条件，如果满足，则说明是漏洞，反之则是误报。如果执行到分支指令，就复制当前状态，同时筛选状态。最后就是更新状态。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503190438707.png" alt="image-20210503190438707"></p>
+<p>筛选状态的算法如下图所示，图来源于论文。es，es2分别表示分支为true的状态和分支为false状态。因此，l1，l2分别表示es，es2状态的将要执行的下一条指令的行号。如果之前提取的warning路径集合里包含l1或l2，则筛选掉另外一个。但如果路径集合里没有l1，l2，或者都有l1，l2，就不做筛选操作。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503190756936.png" alt="image-20210503190756936"></p>
+<p>不筛选的原因有两个。第一，路径集合里没有l1，l2，有可能是符号执行去探索一些没有出现在警告路径里的库函数调用。第二，路径集合里有l1和l2，可能是溢出点在循环里，这样两个分支就都存在warning路径。</p>
+<p>漏洞验证模块是去求解当前状态是否满足人工设定的漏洞约束条件。设定的约束条件如下表所示（表来源于论文）。这部分代码可以查看project&#x2F;src&#x2F;klee_symbolic_execution&#x2F;lib&#x2F;Core&#x2F;Executor.cpp里的BFO_Check函数。代码量比较大，大概2000行左右，就不贴出来了。主要思路就是根据各种容易出问题的库函数API，设定缓冲区溢出的约束条件。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503193633408.png" alt="image-20210503193633408"></p>
+<h3 id="2-3-Targeted-Automatic-Repair-Suggestions"><a href="#2-3-Targeted-Automatic-Repair-Suggestions" class="headerlink" title="2.3 Targeted Automatic Repair Suggestions"></a>2.3 Targeted Automatic Repair Suggestions</h3><p>BovInspector修补漏洞的策略采用专家知识构建的模板，主要有以下11种修补模式（表源于论文）。具体实现可以去看代码（位于project&#x2F;src&#x2F;repair_buffer_overflow&#x2F;repair.py ）</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20210503192324877.png" alt="image-20210503192324877"></p>
+<h2 id="3-安装"><a href="#3-安装" class="headerlink" title="3.安装"></a>3.安装</h2><p>想跳过下面的安装步骤，可以直接用我构建好的docker 镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull iskindar/bov:v1</span><br><span class="line">docker run -ti --ulimit=&#x27;stack=-1:-1&#x27; --name=&quot;bovinspector&quot; iskindar/bov:v1</span><br><span class="line">source /etc/profile #加载环境变量</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-1-源码安装"><a href="#3-1-源码安装" class="headerlink" title="3.1 源码安装"></a>3.1 源码安装</h3><p>这里提供了docker的安装方式，因为原工具的开发时间比较早，一些环境比较老旧，用docker方便一点。</p>
+<p>构建docker镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -ti --ulimit=&#x27;stack=-1:-1&#x27; --name=&quot;bovinspector&quot; ubuntu:14.04</span><br></pre></td></tr></table></figure>
+
+<p>进入docker容器安装依赖</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ apt-get update</span><br><span class="line">$ apt-get install g++ python curl cmake git bison flex bc libcap-dev</span><br><span class="line">$ apt-get install zlib1g-dev</span><br></pre></td></tr></table></figure>
+
+<p>安装llvm-gcc</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ wget http://llvm.org/releases/2.9/llvm-gcc4.2-2.9-x86_64-linux.tar.bz2</span><br><span class="line">$ tar -jxvf llvm-gcc4.2-2.9-x86_64-linux.tar.bz2</span><br></pre></td></tr></table></figure>
+
+<p>将llvm-gcc添加到环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vim /etc/profile</span></span><br><span class="line">export PATH=$PATH:/root/llvm-gcc4.2-2.9-x86_64-linux/bin #把这行加入/etc/profile文件末尾</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">source</span> /etc/profile</span></span><br></pre></td></tr></table></figure>
+
+<p>源码安装llvm-2.9，安好之后，可以把按上面的步骤把llvm-2.9&#x2F;Release+Asserts&#x2F;bin加入环境变量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ wget http://llvm.org/releases/2.9/llvm-2.9.tgz</span><br><span class="line">$ tar -zxvf llvm-2.9.tgz  </span><br><span class="line">$ cd llvm-2.9  </span><br><span class="line">$ ./configure --enable-optimized --enable-assertions  </span><br><span class="line">$ make</span><br></pre></td></tr></table></figure>
+
+<p>安装minisat（STP需要这个）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https://github.com/stp/minisat.git</span><br><span class="line">$ cd minisat</span><br><span class="line">$ mkdir build</span><br><span class="line">$ cd build</span><br><span class="line">$ cmake ../</span><br><span class="line">$ make</span><br><span class="line">$ sudo make install</span><br></pre></td></tr></table></figure>
+
+<p>安装STP(约束求解器)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ tar xzfv 2.1.0.tar.gz  </span><br><span class="line">$ cd stp-2.1.0</span><br><span class="line">$ mkdir build</span><br><span class="line">$ cd build</span><br><span class="line">$ cmake ..  </span><br><span class="line">$ make</span><br><span class="line">$ sudo make DESTDIR=/root/stp_install install</span><br></pre></td></tr></table></figure>
+
+<p>安装uclibc（KLEE用来模拟库函数的组件）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ git clone git://github.com/klee/klee-uclibc.git</span><br><span class="line">$ cd klee-uclibc</span><br><span class="line">$ ./configure --make-llvm-lib</span><br><span class="line">$ make -j2</span><br><span class="line">$ cd ..</span><br></pre></td></tr></table></figure>
+
+<p>安装bovinspector，为方便使用，也可以把project&#x2F;src&#x2F;klee_symbolic_execution&#x2F;Release+Asserts&#x2F;bin加入环境变量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/BovInspectorTool1/project.git</span><br><span class="line">cd project/src/klee_symbolic_execution/</span><br><span class="line">./configure --with-llvm=/root/llvm-2.9 --with-stp=/root/stp_install --with-uclibc=/root/klee-uclibc --enable-posix-runtime</span><br><span class="line">make -j $(grep -c processor /proc/cpuinfo) ENABLE_OPTIMIZED=1</span><br></pre></td></tr></table></figure>
+
+<p>安装llvm pass</p>
+<p>将project&#x2F;src&#x2F;build_control_flow_graph移到llvm-2.9&#x2F;lib&#x2F;Transform&#x2F;下，并将文件夹重命名为buildCFG</p>
+<p>修改lib&#x2F;Transform&#x2F;Makefile为(就是第二行加个buildCFG：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">LEVEL = ../..</span><br><span class="line">PARALLEL_DIRS = Utils Instrumentation Scalar InstCombine IPO Hello BuildCFG</span><br><span class="line"></span><br><span class="line">include $(LEVEL)/Makefile.config</span><br><span class="line"></span><br><span class="line"># No support for plugins on windows targets</span><br><span class="line">ifeq ($(HOST_OS), $(filter $(HOST_OS), Cygwin MingW Minix))</span><br><span class="line">  PARALLEL_DIRS := $(filter-out Hello, $(PARALLEL_DIRS))</span><br><span class="line">  PARALLEL_DIRS := $(filter-out buildcfg, $(PARALLEL_DIRS))</span><br><span class="line">endif</span><br><span class="line"></span><br><span class="line">include $(LEVEL)/Makefile.common</span><br></pre></td></tr></table></figure>
+
+<p>回到llvm-2.9&#x2F;目录下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./configure --enable-optimized --enable-assertions  </span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p>可以看到&#x2F;root&#x2F;llvm-2.9&#x2F;Release+Asserts&#x2F;lib目录下有buildCFG.so，就说明安装成功了。</p>
+<h2 id="4-使用"><a href="#4-使用" class="headerlink" title="4. 使用"></a>4. 使用</h2><p>论文中给的一个简单的测试程序src.c：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAX_LEN  24</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MIN_LEN  4</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">usage</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">char</span> des_buffer[MIN_LEN];  </span><br><span class="line">    <span class="type">char</span>* src_buffer=<span class="string">&quot;this is an example&quot;</span>;</span><br><span class="line">    <span class="built_in">strcpy</span>(des_buffer,src_buffer);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">initialize</span><span class="params">(<span class="type">char</span>* argv_string)</span> &#123;</span><br><span class="line">    <span class="type">char</span> mapped_argv[MIN_LEN];</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strlen</span>(argv_string) &gt;= MAX_LEN)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">strcpy</span>(mapped_argv,argv_string);</span><br><span class="line">    <span class="keyword">if</span> (argv_string[<span class="number">0</span>] != <span class="string">&#x27;-&#x27;</span>) &#123;</span><br><span class="line">        <span class="built_in">strcat</span>(mapped_argv, <span class="string">&quot;-&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> MAX_LEN;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span> &#123;	</span><br><span class="line">    <span class="type">char</span>* mode = (<span class="type">char</span>*)<span class="built_in">malloc</span>(MIN_LEN);</span><br><span class="line">    <span class="type">int</span> len = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strlen</span>(argv[<span class="number">1</span>]) &lt; MIN_LEN)</span><br><span class="line">        len = initialize(argv[<span class="number">1</span>]);</span><br><span class="line">    <span class="keyword">if</span> (len &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        mode = (<span class="type">char</span>*)<span class="built_in">realloc</span>(mode, len);</span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        mode[<span class="number">0</span>] = argv[<span class="number">1</span>][<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    mode[MIN_LEN<span class="number">-1</span>] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    <span class="built_in">free</span>(mode);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假设用某些静态分析工具跑出的结果checklist_bufferoverflow：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">0</span><br><span class="line">src.c	7	DEF</span><br><span class="line">src.c	9	BOF</span><br><span class="line">END_PATH</span><br><span class="line">1</span><br><span class="line">src.c	22	DEF</span><br><span class="line">src.c	26	N/A</span><br><span class="line">src.c	12	N/A</span><br><span class="line">src.c	15	N/A</span><br><span class="line">src.c	17	BOF</span><br><span class="line">END_PATH</span><br><span class="line">2</span><br><span class="line">src.c	28	DEF</span><br><span class="line">src.c	33	BOF</span><br><span class="line">END_PATH</span><br><span class="line">3</span><br><span class="line">src.c	22	DEF</span><br><span class="line">src.c	26	N/A</span><br><span class="line">src.c	12	N/A</span><br><span class="line">src.c	15	BOF</span><br><span class="line">END_PATH</span><br></pre></td></tr></table></figure>
+
+<p>新建一个文件夹，比如paper_example</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir paper_example</span><br><span class="line">vim src.c # 将上面的内容复制进来</span><br><span class="line">vim checklist_bufferoverflow #将上面的内容复制进来</span><br></pre></td></tr></table></figure>
+
+<p>用llvm-gcc生成字节码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">llvm-gcc --emit-llvm -c -g src.c</span><br></pre></td></tr></table></figure>
+
+<p>构建CFG，生成GuideSrc.txt，programCFG.dot</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opt -load /root/llvm-2.9/Release+Asserts/lib/buildCFG.so -buildCFG -targetList=./checklist_bufferoverflow src.o</span><br></pre></td></tr></table></figure>
+
+<p>运行klee，验证warning</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">klee --libc=uclibc --posix-runtime --guided-execution src.o --sym-args 1 3 25</span><br></pre></td></tr></table></figure>
+
+<p>最后应该会生成report_BFO.txt和report_NOTBFO.txt文件，内容如下：</p>
+<p>report_BFO.txt：真实的缓冲区溢出所在行数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">src.c_17 strcat</span><br></pre></td></tr></table></figure>
+
+<p>report_NOTBFO.txt：误报的缓冲区溢出漏洞行数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">src.c_15 strcpy</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>最后简单总结下，这个工具的思路虽然很简单，但实际实现过程的代码量还是相当大的。另外，可能因为这个工作比较早完成的，一些软件的版本比较老，让我安装起来着实费了不少劲。非常感谢这篇论文作者将工作开源了，让本菜鸡能够学习到如何去修改KLEE实现相应的功能，并加深了对于KLEE工作的理解。</p>
+<h2 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h2><ol>
+<li>Gao F, Wang L, Li X. BovInspector: Automatic inspection and repair of buffer overflow vulnerabilities. In Proc. the 31st IEEE&#x2F;ACM Int. Conference on Automated Software Engineering, Sept. 2016, pp.786-791.</li>
+<li>bovinspector：<a target="_blank" rel="noopener" href="https://github.com/BovInspectorTool1/project">https://github.com/BovInspectorTool1/project</a></li>
+<li>bovinspector项目介绍：<a target="_blank" rel="noopener" href="https://bovinspectortool1.github.io/project/">https://bovinspectortool1.github.io/project/</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/symbolic-execution/" rel="tag"># symbolic execution</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/20/KLEE%20%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" rel="prev" title="KLEE 源码阅读笔记">
+      <i class="fa fa-chevron-left"></i> KLEE 源码阅读笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/01/angr%20simulation_manage%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" rel="next" title="源码解析angr模拟执行">
+      源码解析angr模拟执行 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BovInspector%EF%BC%9A%E4%B8%80%E4%B8%AA%E8%87%AA%E5%8A%A8%E5%8C%96%E9%AA%8C%E8%AF%81%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-number">1.</span> <span class="nav-text">BovInspector：一个自动化验证缓冲区溢出漏洞的工具</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.2.</span> <span class="nav-text">1.简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%8E%9F%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">2.原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Warning-Reachability-Analysis"><span class="nav-number">1.3.1.</span> <span class="nav-text">2.1 Warning Reachability Analysis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Guided-Symbolic-Execution"><span class="nav-number">1.3.2.</span> <span class="nav-text">2.2 Guided Symbolic Execution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Targeted-Automatic-Repair-Suggestions"><span class="nav-number">1.3.3.</span> <span class="nav-text">2.3 Targeted Automatic Repair Suggestions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%AE%89%E8%A3%85"><span class="nav-number">1.4.</span> <span class="nav-text">3.安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85"><span class="nav-number">1.4.1.</span> <span class="nav-text">3.1 源码安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E4%BD%BF%E7%94%A8"><span class="nav-number">1.5.</span> <span class="nav-text">4. 使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%80%BB%E7%BB%93"><span class="nav-number">1.6.</span> <span class="nav-text">5. 总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%8F%82%E8%80%83"><span class="nav-number">1.7.</span> <span class="nav-text">6. 参考</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="iskindar"
+      src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+  <p class="site-author-name" itemprop="name">iskindar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iskindar" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iskindar" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:iskindar97@gmail.com" title="E-Mail → mailto:iskindar97@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iskindar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/model/katou_01/katou_01.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

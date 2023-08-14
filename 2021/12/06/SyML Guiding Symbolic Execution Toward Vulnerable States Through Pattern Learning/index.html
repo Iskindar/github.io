@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iskindar.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SyML: Guiding Symbolic Execution Toward Vulnerable States Through Pattern LearningRAID 2021 开源：https:&#x2F;&#x2F;github.com&#x2F;ucsb-seclab&#x2F;syml 背景在二进制程序里探索很多的执行路径对于发现新的漏洞是很重要的。动态符号执行能够触发复杂的输入条件，并且能够精确地探索程序，同时提供cra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】SyML, Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning">
+<meta property="og:url" content="http://iskindar.github.io/2021/12/06/SyML%20Guiding%20Symbolic%20Execution%20Toward%20Vulnerable%20States%20Through%20Pattern%20Learning/index.html">
+<meta property="og:site_name" content="iskindar的博客">
+<meta property="og:description" content="SyML: Guiding Symbolic Execution Toward Vulnerable States Through Pattern LearningRAID 2021 开源：https:&#x2F;&#x2F;github.com&#x2F;ucsb-seclab&#x2F;syml 背景在二进制程序里探索很多的执行路径对于发现新的漏洞是很重要的。动态符号执行能够触发复杂的输入条件，并且能够精确地探索程序，同时提供cra">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206153130549.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211207195051499.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206162035958.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206201122540.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206202852245.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206203433675.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206205106545.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206210615013.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206210926417.png">
+<meta property="article:published_time" content="2021-12-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-14T08:06:32.168Z">
+<meta property="article:author" content="iskindar">
+<meta property="article:tag" content="paper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206153130549.png">
+
+<link rel="canonical" href="http://iskindar.github.io/2021/12/06/SyML%20Guiding%20Symbolic%20Execution%20Toward%20Vulnerable%20States%20Through%20Pattern%20Learning/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【论文笔记】SyML, Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning | iskindar的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9a79db5615c4a0bf77e512dd81c44895";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">iskindar的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Into the Night !</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/iskindar" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2021/12/06/SyML%20Guiding%20Symbolic%20Execution%20Toward%20Vulnerable%20States%20Through%20Pattern%20Learning/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【论文笔记】SyML, Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-07 00:00:00" itemprop="dateCreated datePublished" datetime="2021-12-07T00:00:00+08:00">2021-12-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 16:06:32" itemprop="dateModified" datetime="2023-08-14T16:06:32+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="SyML-Guiding-Symbolic-Execution-Toward-Vulnerable-States-Through-Pattern-Learning"><a href="#SyML-Guiding-Symbolic-Execution-Toward-Vulnerable-States-Through-Pattern-Learning" class="headerlink" title="SyML: Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning"></a>SyML: Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning</h1><p>RAID 2021</p>
+<p>开源：<a target="_blank" rel="noopener" href="https://github.com/ucsb-seclab/syml">https://github.com/ucsb-seclab/syml</a></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在二进制程序里探索很多的执行路径对于发现新的漏洞是很重要的。动态符号执行能够触发复杂的输入条件，并且能够精确地探索程序，同时提供crash的可复现性和语义信息。然而，要扩展这种分析方式到复杂的二进制程序里是很困难的。目前的方法有很严重的路径爆炸问题。尽管现在有很多方式提出来解决这个问题，但现阶段这个挑战仍然很难解决，并且通过这种技术发现的漏洞都很少。</p>
+<p>这篇文章的工作重心就是尝试去解决符号执行的路径爆炸问题。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="数据集（放实验讲吧）"><a href="#数据集（放实验讲吧）" class="headerlink" title="数据集（放实验讲吧）"></a>数据集（放实验讲吧）</h3><p>选择CGC数据集，包含232个漏洞程序，其中有超过400个漏洞输入能够触发各种漏洞。然而，由于DSE引擎的问题，有些漏洞无法分析。最后就只剩下包含120多个漏洞的75个二进制可以用。</p>
+<p>作者还列举了选测试集的一些标准，包含volume、variety、consistency、complexity、confidence这些指标。</p>
+<h3 id="整体框架"><a href="#整体框架" class="headerlink" title="整体框架"></a>整体框架</h3><p>整体可以分为特征提取、数据清洗、训练模型、导向符号执行这几个部分。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206153130549.png" alt="image-20211206153130549"></p>
+<h4 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h4><p>特征提取包含三个步骤：</p>
+<ol>
+<li>具体追踪<ul>
+<li>用会崩溃的输入在QEMU里运行漏洞二进制，收集导致crash的trace。</li>
+</ul>
+</li>
+<li>静态分析<ul>
+<li>收集全局的静态信息，包括CFG等，来支持后续的分析</li>
+</ul>
+</li>
+<li>动态符号追踪<ul>
+<li>然后沿着记录的trace去符号执行</li>
+</ul>
+</li>
+</ol>
+<p>提取的特征如下：</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211207195051499.png" alt="image-20211207195051499"></p>
+<h4 id="数据清洗"><a href="#数据清洗" class="headerlink" title="数据清洗"></a>数据清洗</h4><p>去除缺失值、异常值、离群值和重复值</p>
+<h4 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h4><p>采用四个指标来评估分类模型：</p>
+<ul>
+<li>F1-score：</li>
+<li>准确率</li>
+<li>trace覆盖率</li>
+<li>判分时间</li>
+</ul>
+<h4 id="导向符号执行"><a href="#导向符号执行" class="headerlink" title="导向符号执行"></a>导向符号执行</h4><p>由于预测不一定准确，并且搜索空间很大，因此需要使用一些策略来最大化利用状态预测的结果。</p>
+<p>探索策略如下：</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206162035958.png" alt="image-20211206162035958"></p>
+<p>性能考量</p>
+<ol>
+<li>初始开销。为了避免在探索阶段引入额外开销，这里提前从上下文信息里计算某些特征来作为初始开销，比如connectivity，centrality，function_size，function complexity，components information，community partition这些。</li>
+<li>特征数目。特征数目太多会导致计算开销增加或者模型准确率降低。因此，使用information gain来手动检查所有的特征，确保他们都是相关的特征。</li>
+</ol>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><h3 id="模型准确度和特征评估。"><a href="#模型准确度和特征评估。" class="headerlink" title="模型准确度和特征评估。"></a>模型准确度和特征评估。</h3><p>选择了几个常见的机器学习模型来进行训练。所有的模型都是调用scikit-learn来实现的。下面的数据都是使用交叉验证来验证的，在每次验证回合，将一个二进制取出来，然后其他的二进制用来训练，得到F1，准确率等指标。下面的表格基本说明他提的特征是没啥问题的。</p>
+<p>实际上他的特征也不是一次就提取正确的。这个结果应该是他把系统调用等一些特征移出去得到的结果。最后考虑模型下面的指标，选择了XGBoost作为模型来预测状态。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206201122540.png" alt="image-20211206201122540"></p>
+<h3 id="和现有工作做对比"><a href="#和现有工作做对比" class="headerlink" title="和现有工作做对比"></a>和现有工作做对比</h3><p>作者将自己的工作和现有的先进路径选择策略做了对比。这些策略包含KLEE Coverage（2008），KLEE Random（2008），AEG Loop Exhaustion（2011）。感觉都挺老的，说明现在没有什么更先进的路径选择策略。</p>
+<p>从结果来看，作者的方法更加通用，能测试更多的有漏洞的二进制。但也不是所有的都能跑通。有的时间上也比传统的启发式方法要更慢。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206202852245.png" alt="image-20211206202852245"></p>
+<p>作者也整理了一下时间维度的对比。随着时间的增加，作者的方法能跑出更多的crash。在相同时间内能跑出的crash的数量和其他传统方法差不多。另外，这种路径选择方式更加通用，不局限于特定的漏洞种类。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206203433675.png" alt="image-20211206203433675"></p>
+<h3 id="score-分析"><a href="#score-分析" class="headerlink" title="score 分析"></a>score 分析</h3><p>有点不太清楚这个score是什么，是如何计算的？</p>
+<p>在探索时分析syml的score的分布情况，期望在探索到漏洞时候分数增加，反之则减小。作者发现这里分数分布和漏洞发现的模式很相同。在刚开始，分数很不稳定，也偏低。分数在崩溃点之后会进入一个谷底，然后又是一段平稳期。随后，分数又变高了，意味着程序在离崩溃点很近的位置或者其他有趣的地方开始探索了。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206205106545.png" alt="image-20211206205106545"></p>
+<h3 id="应用到真实程序里"><a href="#应用到真实程序里" class="headerlink" title="应用到真实程序里"></a>应用到真实程序里</h3><p>作者将方法应用到三个真实的linux二进制里，asp2php，o3read，ringtonetools。这三个程序代码量都不大，万行左右的代码量级。</p>
+<p>在真实程序里测试的结果不是很理想。数据都偏低。因此，作者将CGC上训练好的模型和linux程序一起学习，性能得到了一定的提升。但还是属于一个比较偏低的水平。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206210615013.png" alt="image-20211206210615013"></p>
+<p>横坐标表示程序执行的情况。0表示刚从程序开始运行，100表示运行到漏洞点了。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20211206210926417.png" alt="image-20211206210926417"></p>
+<h2 id="讨论"><a href="#讨论" class="headerlink" title="讨论"></a>讨论</h2><p>作者认为这是第一个机器学习方法应用到符号执行引擎里的分支选择里。刚好今年的CCS 2021年也出了一篇类似的，通过提取分支的特征，来训练机器学习模型，从而进一步去指导符号执行。</p>
+<p>最大的缺陷就是在真实的linux程序上的效果很差。Learning to Explore Paths for Symbolic Execution</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>将符号执行里的分支选择问题，当作是二分类问题来看待。</p>
+<p>利用现有的PoC的trace，沿着trace进行符号执行来收集特征信息，训练好模型，利用训练好的模型来选择状态。</p>
+<p>相比启发式规则，更加通用。能够挖掘漏洞的类型取决于训练的数据集。</p>
+<p>研究方法看起来相对复杂。但理清了思路感觉还是比较有创新性的。</p>
+<p>如果能够应用到更多的真实程序里，应该能够发顶会。</p>
+<hr>
+<p>其他：</p>
+<p>RAID 属于安全领域的四小顶会。也算是个水平比较高的会议了。</p>
+<p>讲这篇B会是想让大家感受下B会的论文的水平是怎么样的。</p>
+<p>总的来说，B会的论文，可能实验效果在真实程序上不理想，但至少实验是相对来说比较完整的。各个小实验里能够支撑论文的点，并且都有些很有意思的发现。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/paper/" rel="tag"># paper</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/01/angr%20simulation_manage%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" rel="prev" title="源码解析angr模拟执行">
+      <i class="fa fa-chevron-left"></i> 源码解析angr模拟执行
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/12/15/learch/" rel="next" title="【论文笔记】Learning to Explore Paths for Symbolic Executio">
+      【论文笔记】Learning to Explore Paths for Symbolic Executio <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SyML-Guiding-Symbolic-Execution-Toward-Vulnerable-States-Through-Pattern-Learning"><span class="nav-number">1.</span> <span class="nav-text">SyML: Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%88%E6%94%BE%E5%AE%9E%E9%AA%8C%E8%AE%B2%E5%90%A7%EF%BC%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">数据集（放实验讲吧）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%A1%86%E6%9E%B6"><span class="nav-number">1.2.2.</span> <span class="nav-text">整体框架</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">特征提取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">数据清洗</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">训练模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%BC%E5%90%91%E7%AC%A6%E5%8F%B7%E6%89%A7%E8%A1%8C"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">导向符号执行</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C"><span class="nav-number">1.3.</span> <span class="nav-text">结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E5%87%86%E7%A1%AE%E5%BA%A6%E5%92%8C%E7%89%B9%E5%BE%81%E8%AF%84%E4%BC%B0%E3%80%82"><span class="nav-number">1.3.1.</span> <span class="nav-text">模型准确度和特征评估。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%92%8C%E7%8E%B0%E6%9C%89%E5%B7%A5%E4%BD%9C%E5%81%9A%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.2.</span> <span class="nav-text">和现有工作做对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#score-%E5%88%86%E6%9E%90"><span class="nav-number">1.3.3.</span> <span class="nav-text">score 分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%88%B0%E7%9C%9F%E5%AE%9E%E7%A8%8B%E5%BA%8F%E9%87%8C"><span class="nav-number">1.3.4.</span> <span class="nav-text">应用到真实程序里</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A8%E8%AE%BA"><span class="nav-number">1.4.</span> <span class="nav-text">讨论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">1.5.</span> <span class="nav-text">结论</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="iskindar"
+      src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+  <p class="site-author-name" itemprop="name">iskindar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iskindar" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iskindar" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:iskindar97@gmail.com" title="E-Mail → mailto:iskindar97@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iskindar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/model/katou_01/katou_01.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

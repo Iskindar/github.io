@@ -14,21 +14,23 @@
 
 
 <link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"iskindar.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta property="og:type" content="website">
-<meta property="og:title" content="空想森林">
-<meta property="og:url" content="http://example.com/index.html">
-<meta property="og:site_name" content="空想森林">
+<meta property="og:title" content="iskindar的博客">
+<meta property="og:url" content="http://iskindar.github.io/index.html">
+<meta property="og:site_name" content="iskindar的博客">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="iskindar">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/">
+<link rel="canonical" href="http://iskindar.github.io/">
 
 
 <script id="page-configurations">
@@ -41,10 +43,19 @@
   };
 </script>
 
-  <title>空想森林</title>
+  <title>iskindar的博客</title>
   
 
 
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9a79db5615c4a0bf77e512dd81c44895";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
 
 
 
@@ -92,14 +103,15 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">空想森林</h1>
+      <h1 class="site-title">iskindar的博客</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
-      <p class="site-subtitle" itemprop="description">Into the Forest!</p>
+      <p class="site-subtitle" itemprop="description">Into the Night !</p>
   </div>
 
   <div class="site-nav-right">
     <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
     </div>
   </div>
 </div>
@@ -119,11 +131,43 @@
     <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
   </ul>
 </nav>
 
 
 
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
 
 </div>
     </header>
@@ -133,6 +177,10 @@
     <i class="fa fa-arrow-up"></i>
     <span>0%</span>
   </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/iskindar" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
 
 
     <main class="main">
@@ -146,21 +194,21 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/1970/01/01/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/10/24/FishFuzz%20Throwing%20Larger%20Nets%20to%20Catch%20Deeper%20Bugs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
       <meta itemprop="name" content="iskindar">
       <meta itemprop="description" content="">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="空想森林">
+      <meta itemprop="name" content="iskindar的博客">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/1970/01/01/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
+            <a href="/2022/10/24/FishFuzz%20Throwing%20Larger%20Nets%20to%20Catch%20Deeper%20Bugs/" class="post-title-link" itemprop="url">【论文笔记】FishFuzz:Throwing Larger Nets to Catch Deeper Bugs</a>
         </h2>
 
         <div class="post-meta">
@@ -170,14 +218,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：1970-01-01 00:00:00" itemprop="dateCreated datePublished" datetime="1970-01-01T00:00:00+00:00">1970-01-01</time>
+              <time title="创建时间：2022-10-25 00:00:00" itemprop="dateCreated datePublished" datetime="2022-10-25T00:00:00+08:00">2022-10-25</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-08-14 03:23:19" itemprop="dateModified" datetime="2023-08-14T03:23:19+00:00">2023-08-14</time>
+                <time title="修改时间：2023-08-14 16:06:40" itemprop="dateModified" datetime="2023-08-14T16:06:40+08:00">2023-08-14</time>
               </span>
 
           
@@ -191,19 +239,1992 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+          <h1 id="FishFuzz-Throwing-Larger-Nets-to-Catch-Deeper-Bugs"><a href="#FishFuzz-Throwing-Larger-Nets-to-Catch-Deeper-Bugs" class="headerlink" title="FishFuzz: Throwing Larger Nets to Catch Deeper Bugs"></a>FishFuzz: Throwing Larger Nets to Catch Deeper Bugs</h1><p>开源于：<a target="_blank" rel="noopener" href="https://zenodo.org/record/6405418">https://zenodo.org/record/6405418</a></p>
+<h2 id="论文基本信息"><a href="#论文基本信息" class="headerlink" title="论文基本信息"></a>论文基本信息</h2><p>发表年份：2022<br>发表会议或期刊（简称，CCF级别）：预印版<br>论文标题（论文简称）：FishFuzz: Throwing Larger Nets to Catch Deeper Bugs<br>论文作者所在团队：网络中心、兰州理工、西电、海南，EPFL<br>论文一句话概述：论文提出XX方法，解决了XX问题。<br>论文实验情况：实验工具（是否开源），实验测试集（是否开源），实验环境，实验规模，简要过程</p>
+<h2 id="论文概述"><a href="#论文概述" class="headerlink" title="论文概述"></a>论文概述</h2><p>定向模糊测试是在开发中发现漏洞的一种标准方法。模糊测试会执行许多输入来最大化测试的代码。最近，定向模糊测试提出了一种策略，不仅仅是最大化覆盖率。而是让测试导向特定区域。定向模糊测试有两个阶段，exploration（探索有趣的区域）和exploitation（触发漏洞）。目前的定向模糊测试的探索阶段都是用覆盖率来引导，exploitation阶段是通过切换不同目标来间接实现的。具体来说，文章发现了现有定向模糊测试的两个局限。（i）距离指标在对多条路径和多个目标进行计算的时候不是很准确。（2）分配能量到种子的粒度比较粗糙，没有考虑调整目标的优先级。</p>
+<p>文章提出了FishFuzz，灵感来源捕鱼。首先放一个大网，获取比较高的覆盖率，然后慢慢收网来最大化抓到的鱼。FishFuzz的核心是两个理念：（1）一种新的距离指标，准确率和目标的多少无关。（2）动态的目标排名，能够自动排除已探索过很多次的target。这个策略让FishFuzz能够无缝从单目标到多目标的切换，并且能够动态地在exploration和exploitation中切换。</p>
+<p>评估部分，将所有的sanitizer打的标签当作是target。并与三个DGF和两个CGF作笔记，结果表示，FishFuzz能够实现更高的覆盖率，并且复现现有的bug更快，最后在44个程序中发现了25个新的bug。</p>
+<h2 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h2><p>问题是什么？</p>
+<p>现有的定向模糊测试存在以下两个问题：</p>
+<ul>
+<li>种子爆炸：fuzzing的过程提供了大量的种子，放在一个池子里。导致很多好的种子没有得到足够的重视。</li>
+<li>不准确的距离度量：对大量目标计算距离会引入不准确性，也是现有定向模糊测试的种子调度算法无法处理的。</li>
+</ul>
+<p>意义是什么？</p>
+<p>可以处理大规模目标，而不会丢失准确性。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><p>相关工作主要介绍了定向模糊测试和多阶段模糊测试。</p>
+<h3 id="定向模糊测试"><a href="#定向模糊测试" class="headerlink" title="定向模糊测试"></a>定向模糊测试</h3><p>定向模糊测试是模糊测试的一个分支，专门去测试给定的区域。AFLGO将种子到目标的距离建模为调和平均距离。然而，AFLGo对于大规模的目标会丢失准确性。Hawkeye和FuzzGuard都尝试处理距离计算的间接调用问题，其中hawkey使用重量级的静态分析，Fuzzguard使用深度学习过滤不可达的输入。</p>
+<p>后面的DGF扩展性会更好一些。比如ParmeSan和SAVIOR。他们两个把target当成是所有sanitizer打上的标签。此外，SAVIOR也使用了开销比较大的可达性分析来选择有趣的输入。但他们都有AFLGo的局限性，就是把种子到目标的距离折叠为一个标量。</p>
+<p>CAFL的目标是给定一个crash，然后生成一个PoC。但CAFL只考虑一个目标。AFLChurn通过分析github仓库选择可能存在bug的位置去测试。这和本文算是一个正交的工作。Beacon使用复杂的静态分析来移除不可达的路径，从而提高了exploration的效率。这和fishfuzz提升的维度不一样。</p>
+<h3 id="多阶段模糊测试"><a href="#多阶段模糊测试" class="headerlink" title="多阶段模糊测试"></a>多阶段模糊测试</h3><p>多阶段的模糊测试使用exploration和exploitation来到达和触发多个目标。AFLFast使用马尔科夫链来概率性地选择种子来提高覆盖率。FairFuzz使用一种新的变异策略和种子选择方式来命中稀有的分支。他们的贡献是提高代码覆盖率。而fishfuzz是最大化触发的目标。Yue将适应性能量调度和博弈论结合起来，来防止测试没用的种子。wang基于软件分析选择有趣的目标，然后结合一种新的队列策略。然而，他们的方法只考虑了时间不变的target，也就不会自适应地调整fuzz的能量到更有可能发现漏洞的位置。FishFuzz的队列切换方式是自适应的，而且可以被用来提高wang的工作。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>给定一个目标程序，会编译并用sanitizer插桩，并且提取一些有用的信息。整体流程和通常的模糊测试差不多。主要修改的地方是距离指标和种子选择的实现。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023182021870.png" alt="image-20221023182021870"></p>
+<h3 id="Program-Preparation"><a href="#Program-Preparation" class="headerlink" title="Program Preparation"></a>Program Preparation</h3><p>在程序分析阶段，主要是提取sanitizer插入的target。但由于有些target可能会是不可达的。现有的方法使用静态分析来剔除，但静态分析有可能会误删。因此，FishFuzz将所有的目标都视为有效地，通过动态排名来过滤不理想的目标。</p>
+<p>在编译阶段，提取了控制流图和调用图，此时的图没有考虑间接调用。然后，FishFuzz依赖CFG和CG的过程间距离来选择靠近目标的种子。这些操作都是基于LLVM IR上做的。</p>
+<h3 id="Queue-Culling-Algorithm"><a href="#Queue-Culling-Algorithm" class="headerlink" title="Queue Culling Algorithm"></a>Queue Culling Algorithm</h3><p>队列选择算法灵感源于捕鱼技术。在fuzzing的初期，Fishfuzz采取exploration模式，类似广撒网。当没有发现新的函数时，FishFuzz会去聚焦于最大化到达的目标，类似收网。当到达了足够多的目标时，cull的逻辑改变，尝试去触发有趣的目标（尽可能地抓到更多的鱼）。由于每个步骤都需要不同的指标（到达函数的数量，到达目标的数量，触发目标的数量），所以也像别的工作一样分阶段来做。</p>
+<p>主要分为三个阶段：Inter-function exploration，intra-function exploration ，exploitation。</p>
+<ul>
+<li><p>inter-function exploration：到达感兴趣的函数。</p>
+</li>
+<li><p>intra-funcion exploration：函数内测试，主要是去尽可能地命中更多的目标。</p>
+</li>
+<li><p>exploitation：尽可能地触发更多可以到达目标。</p>
+</li>
+</ul>
+<p>他们的切换过程如下图所示，当没有发现新的函数的时候，就会从inter-function转为intra-function。当发现了新的函数，就会从intra-function转为inter-function。如果没有到达新的target，就会从intra-function切换到exploitation阶段。没有触发新的target，就会从exploitation回到intra-function。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221024210010657.png" alt="image-20221024210010657"></p>
+<p>inter-function exploration过程中，给定一个种子队列和一个函数集合。对于那些经过未探索的函数，并且包含目标的种子，将favor设为1。在把favored的种子提交给程序后，FishFuzz更新探索过的函数列表，并且重复这个过程。getClosestSeedToFun会去找到离目标函数f最近的种子。</p>
+<p>exploitation过程中，FishFuzz会尝试触发已到达的目标。他的思路是通过不同的种子来命中同一目标，能够增加发现bug的概率。首先，使用那些能到达的目标。在trgs_to_visit中，选择前20%命中的目标。对于每个合适的目标，getFastestSeedToTarget返回最快到达t的种子s。这个过程中，有很大的概率选择命中目标的种子（seed target distance&#x3D;0）。</p>
+<h3 id="距离指标"><a href="#距离指标" class="headerlink" title="距离指标"></a>距离指标</h3><p>距离指标分为：</p>
+<ul>
+<li>静态函数距离</li>
+<li>动态种子到函数的距离</li>
+<li>动态种子到多目标的距离</li>
+</ul>
+<p>静态函数距离指的是调用图上两个函数最短的边的数量。</p>
+<p>动态种子到函数的距离，分为以下两种情况，如果种子经过了目标函数，距离则为0，如果没有经过，距离为最近的那个函数到种子的距离。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105710952.png" alt="image-20221025105710952"></p>
+<p>动态种子到多个目标的距离，是由多个种子到各个目标的距离组成的一个向量。会在这个函数用到getFastestSeedToTarget</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105651544.png" alt="image-20221025105651544"></p>
+<p>种子到单个目标的距离为前面的距离，加上一个目标是否被触发的条件。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105750760.png" alt="image-20221025105750760"></p>
+<p>这里很奇怪，给了一个向量，要怎么比距离？向量的比较方式，论文中没有说明。</p>
+<p>关于间接调用的问题。种子到函数的距离被表示为最小函数的距离，作者认为这种方法可以找到近似最佳的结果。当一个种子遍历到间接调用时，fishfuzz可以使用附近的函数来估计种子执行路径到目标函数的距离。如果一个函数没有和其他函数直接联系，模糊器要么生成一个到达该函数的种子，要么生成一个无法到达的种子。实际上，这种方法和以前一个使用fuzzing来探索间接调用的工作相同。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>基于AFL 2.57b实现，插桩使用的是LLVM 12.0.1。实现函数内探索和利用阶段，用了2500行的代码。对于插桩部分，代码有1500行。</p>
+<p>源码和复现相关的材料在被接收后就会开源。目前已开源在：<a target="_blank" rel="noopener" href="https://zenodo.org/record/6405418">https://zenodo.org/record/6405418</a></p>
+<h2 id="实验结果及分析"><a href="#实验结果及分析" class="headerlink" title="实验结果及分析"></a>实验结果及分析</h2><p>回答6个问题：</p>
+<ul>
+<li>FishFuzz能到达多少目标？</li>
+<li>FishFuzz能够平衡能量吗？</li>
+<li>FishFuzz发现漏洞的效率怎么样？</li>
+<li>FishFuzz能发现新漏洞吗？</li>
+<li>FishFuzz是如何重新分配exploration和exploitation？</li>
+<li>其他的fuzzer能够从我们的策略受益吗？</li>
+</ul>
+<p>对比工具选择了TortoiseFuzz，ParmeSan和SAVIOR。同时AFL++和AFL也被作为baseline。</p>
+<p>benchmark方面，选择了TortoiseFuzz、SAVIOR和ParmeSan测试的程序。TortoiseFuzz用的程序会被ASAN插桩，在文章中叫ASAN benchmark。SAVIOR测的程序只包含UBSan sanitizer，就叫UBSAN benchmark。</p>
+<h3 id="RQ1"><a href="#RQ1" class="headerlink" title="RQ1"></a>RQ1</h3><p>这个实验评估的指标主要是覆盖率和目标覆盖率。</p>
+<p>对比ParmeSan和TortoiseFuzz。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023163233076.png" alt="image-20221023163233076"></p>
+<p>和SAVIOR进行对比的结果。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023163242967.png" alt="image-20221023163242967"></p>
+<h3 id="RQ2"><a href="#RQ2" class="headerlink" title="RQ2"></a>RQ2</h3><p>这个部分评估FishFuzz为目标重新分配能量的能力。与AFL进行对比，跑3轮24小时。下面的图展示了FishFuzz尝试去分配能量给那些测试比较少的target。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025113308569.png" alt="image-20221025113308569"></p>
+<h3 id="RQ3"><a href="#RQ3" class="headerlink" title="RQ3"></a>RQ3</h3><p>这个实验中是评估exploitation阶段触发漏洞的能力。主要是比发现的漏洞的数量。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114407436.png" alt="image-20221025114407436"></p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114416052.png" alt="image-20221025114416052"></p>
+<h3 id="RQ4"><a href="#RQ4" class="headerlink" title="RQ4"></a>RQ4</h3><p>找了28个顶会里用的程序，对于每个程序用ASan和UBSan插桩，用一周的时间去找漏洞。最后发现了25个新的漏洞，其中18个被确认为CVE。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114530188.png" alt="image-20221025114530188"></p>
+<h3 id="RQ5"><a href="#RQ5" class="headerlink" title="RQ5"></a>RQ5</h3><p>这个实验主要是看三个阶段的覆盖率，触发的目标和轨迹。下面这个图展示了各个fuzzer阶段覆盖的边的情况。蓝色是inter-function，绿色是intra-function，红色是exploitation。覆盖率在exploration阶段的时候，快速上升。在exploitation（红色）阶段，覆盖率趋于平稳。两种exploration阶段在开始阶段比较频繁出现，exploitation阶段则倾向于在后期出现。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114940865.png" alt="image-20221025114940865"></p>
+<h3 id="RQ6"><a href="#RQ6" class="headerlink" title="RQ6"></a>RQ6</h3><p>和其他fuzzer结合的能力如何，明显比afl和qsym的相性好。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114612407.png" alt="image-20221025114612407"></p>
+<h2 id="论文总结"><a href="#论文总结" class="headerlink" title="论文总结"></a>论文总结</h2><h2 id="自己的感受"><a href="#自己的感受" class="headerlink" title="自己的感受"></a>自己的感受</h2><p>读完论文后，自己的想法<br>论文有哪些优点和亮点<br>论文还有哪些问题没有解决<br>有哪些启发，可以继续探索</p>
+<p>作者很贴心地附上了画韦恩图的工具：jvenn: an interactive venn diagram viewer</p>
+<p>tortoisefuzz我得看看，之前给我的印象并不是定向模糊测试。</p>
+<p>Mann-Whitney U test，这个概念在windranger中也看到过，当时没有特别注意。有时间再搜搜看。</p>
+<p>文章留了很多阈值调参来作为后续的工作。阈值是不是也是程序无关的呢？</p>
+<p>arxiv上的写作上还有些瑕疵。</p>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+      
+    </div>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/10/17/WindRanger%20A%20Directed%20Greybox%20Fuzzer%20driven%20by%20Deviation%20Basic%20Blocks/">
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/17/WindRanger%20A%20Directed%20Greybox%20Fuzzer%20driven%20by%20Deviation%20Basic%20Blocks/" class="post-title-link" itemprop="url">【论文笔记】WindRanger:A Directed Greybox Fuzzer driven by Deviation Basic Blocks</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-18 00:00:00" itemprop="dateCreated datePublished" datetime="2022-10-18T00:00:00+08:00">2022-10-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 16:02:17" itemprop="dateModified" datetime="2023-08-14T16:02:17+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="WindRanger-A-Directed-Greybox-Fuzzer-driven-by-Deviation-Basic-Blocks"><a href="#WindRanger-A-Directed-Greybox-Fuzzer-driven-by-Deviation-Basic-Blocks" class="headerlink" title="WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks"></a>WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks</h1><h2 id="论文基本信息"><a href="#论文基本信息" class="headerlink" title="论文基本信息"></a>论文基本信息</h2><p>发表年份：2022<br>发表会议或期刊（简称，CCF级别）：CCF A类会议 ICSE<br>论文标题（论文简称）：WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks<br>论文一句话概述：提出了deviation basic block的概念，并利用它构造定向模糊测试。</p>
+<p>工具开源于：<a target="_blank" rel="noopener" href="https://sites.google.com/view/windranger-directed-fuzzing/">https://sites.google.com/view/windranger-directed-fuzzing/</a></p>
+<p>实验用的数据是unibench，开源于：</p>
+<h2 id="论文概述"><a href="#论文概述" class="headerlink" title="论文概述"></a>论文概述</h2><p>定向模糊测试是一种安全测试技术，致力于探索程序中的特定的位置。为了获取定向性，DGF优先选择那些执行路径离目标位置更近的种子。因此，评估种子执行路径到目标位置的距离对于定向模糊测试来说很重要。第一个定向灰盒测试器，AFLGo使用静态分析来计算基本块距离，并且在执行的过程中累积执行过基本块的距离来计算种子离目标的距离。顺延AFLGo，后续的定向模糊测试都使用所有的基本块计算距离，并且只考虑了控制流信息。然而，不是所有的基本块都是同等重要的，就有一些基本块（deviation basic block）的执行路径已经开始偏离目标位置。</p>
+<p>文章提出了一种名为WindRanger的技术，利用了deviation basic block来构造定向灰盒测试。为了识别deviation basic block，WindRanger不仅应用了静态可达性分析，也使用了动态过滤。为了构建定向模糊测试，WindRanger使用deviation basic block和他们相关的数据流信息来用于种子的距离计算，变异，种子选择，explore和exploit的切换。在3个数据集上使用了29个程序进行评估，实验结果表明WindRanger由于AFLGO，AFL和FairFuzz。而且还发现了1个在ffmpeg的0day漏洞。</p>
+<h2 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h2><p>问题是什么？现有的定向模糊测试计算距离的时候考虑了执行路径上的所有基本块，而且只考虑了控制流信息。然而，不是所有的基本块都是相同重要的，因为有一些开始偏离目标位置的基本块要另作考虑。</p>
+<p>意义是什么？能够更快到达目标，并泄露漏洞。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><p>相关工作分为三类：定向符号执行，定向灰盒测试，覆盖率导向灰盒测试。</p>
+<p>定向符号执行使用协同程序信息来获取定向性，相比通用符号执行，能够有效地测试程序指定位置。然而，定向符号执行在真实程序中效果不好，主要是由于符号执行有严重的路径爆炸问题。</p>
+<p>定向灰盒测试，AFLGo是第一个。计算种子的trace到目标的距离，然后应用到能量调度模块，对离的近的种子赋予更大的能量（变异更多次）。Hawkeye在AFLGo的基础上进行改进，主要改了三个部分，距离增强的能量调度，种子选择，选择性的变异。AFLGo和Hawkeye把所有的基本块都考虑进来来计算距离。WindRanger侧重于那些阻止输入到达目标位置的基本块，来提高定向模糊测试的效率。另外，FuzzGuard利用深度学习来过滤不能到达目标的输入。</p>
+<p>此外，还有一些工作应用定向模糊测试到不同类型的目标点。Leopard使用程序指标来识别程序中的漏洞代码，并把他们设定为目标位置。Parmsan通过sanitizer插桩的位置来作为目标位置。Parmasan基于动态构造的CFG来计算距离。CAFL利用目标位置的顺序信息和数据条件来加强发现目标崩溃的能力。</p>
+<p>覆盖率引导的灰盒模糊测试（CGF）致力于让模糊测试覆盖更多的代码。AFL是经典的CGF，使用覆盖率来引导种子进化。为了提高CGF的覆盖率，一个研究方向是帮助CGF求解程序中的条件约束。混合测试（Hybrid fuzzing）结合CGF和符号执行去加强CGF里的约束求解能力。几个其他的工作采用轻量化的方法来帮助约束求解。Steelix使用轻量的静态分析和二进制插桩来获取比较过程的信息，能够帮助CGF探索那些被魔法字节比较的路径。Angora使用梯度下降的输入搜索来求解约束。Greyone使用污点分析和数据流特征来指导fuzzing的进化。FairFuzz识别并标记那些影响输入覆盖稀有分支的字节。除了这些针对分支的研究，也有一些工作优化种子调度，检查特定类型的漏洞，或者自动生成fuzz的harness。虽然，这些工作和windranger的目标不一致，但windranger也会从这些技术中受益（比如约束求解技术）</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>先看一个motivation example来了解deviation  basic block（DBB）的基本原理。DBB实际上就是开始偏离目标点的那个基本块。比如对于种子A来说，21：1这个点就是DBB。因为他的子节点是不可达的。同理，种子B的DBB就是20：2，种子C的是15：1。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017144152488.png" alt="image-20221017144152488"></p>
+<p>整体框架图如下所示，标有数字的是修改的地方。可以看到改了很多地方。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017111305498.png" alt="image-20221017111305498"></p>
+<h3 id="DBB识别"><a href="#DBB识别" class="headerlink" title="DBB识别"></a>DBB识别</h3><p>对于WindRanger来说，DBB是很重要的概念。首先，用静态分析找到潜在的DBB。然后，在fuzzing的过程中，WindRanger在执行路径中定位DBB，以及他们和潜在DBB的关系。</p>
+<p>潜在DBB的定义如下，简单来说就是满足两个条件：</p>
+<ul>
+<li>自身到目标存在可达路径</li>
+<li>子节点到目标不可达</li>
+</ul>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017151610389.png" alt="image-20221017151610389"></p>
+<p>种子的DBB的定义如下，也是满足两个条件：</p>
+<ul>
+<li>即在种子路径上，又在潜在DBB集合中的</li>
+<li>所有可达的后继节点没有被种子执行</li>
+</ul>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017152201494.png" alt="image-20221017152201494"></p>
+<h3 id="基于估算的污点分析"><a href="#基于估算的污点分析" class="headerlink" title="基于估算的污点分析"></a>基于估算的污点分析</h3><p>使用污点分析的目的是收集数据流信息，可以知道哪些字节会影响给定分支。然后数据流信息就存储在hashmap中，key是分支约束的基本块地址，值是影响分支约束的字节索引。下面的算法，展示了构造这样一个hashmap的过程。</p>
+<p>对于一个种子和它的执行路径，首先提取分支约束相关的变量。然后对这些变量进行字节级的变异。有了这些变异后的输入后，windranger检查每个提取的变量是否在变异后发生了变化。如果变量的值变化了，windranger就会更新哈希表，告诉它，这个变异位置的种子会影响变量。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017155609272.png" alt="image-20221017155609272"></p>
+<h3 id="种子距离计算"><a href="#种子距离计算" class="headerlink" title="种子距离计算"></a>种子距离计算</h3><p>种子计算距离公式如下，简单说就是只计算DBB到目标的距离。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017160401908.png" alt="image-20221017160401908"></p>
+<p>然而，这还不够，再加上数据流信息，距离的计算公式如下：新增的变量是用来判断通过该约束的难易度。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017160917285.png" alt="image-20221017160917285"></p>
+<p>难易度公式：有多少字节可以影响约束变量。越多就说明fuzzer需要满足的条件越多，也就越难。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017161118586.png" alt="image-20221017161118586"></p>
+<h3 id="数据流敏感变异"><a href="#数据流敏感变异" class="headerlink" title="数据流敏感变异"></a>数据流敏感变异</h3><p>如果在exploitation阶段，会将和DBB约束变量相关的输入字节当作是高优先级的字节。</p>
+<p>对于一个约束变量和它相关的输入字节，如果输入字节是连续的。Windranger就会检查变量和输入字节是否共享一个值。如果是的话，很有可能输入字节没有经过数据变换。这种情况下，就直接用比较指令的另外一个操作数来替代输入的相关字节。</p>
+<h3 id="种子选择"><a href="#种子选择" class="headerlink" title="种子选择"></a>种子选择</h3><p>在exploitation阶段，windranger保留一个高优先级的队列。对于每个DBB，windranger会找到覆盖这个DBB的种子们。然后，windranger基于距离升序将种子排序。并将这些种子放在favored队列，把剩下的种子放在less favored 队列。当要选择下一个种子进行变异的时候，有很高的概率选择favored队列里的。</p>
+<p>在exploration阶段，就和普通的CGF一样。选择那些能增加覆盖率的种子。</p>
+<p>至于能量调度，就和AFLGO一样，使用的是模拟退火算法，只不过种子距离不一样。</p>
+<h3 id="动态切换exploration和exploitation"><a href="#动态切换exploration和exploitation" class="headerlink" title="动态切换exploration和exploitation"></a>动态切换exploration和exploitation</h3><p>虽然DGF的目的是尽可能地快地到达目标，但是DGF仍然需要足够的覆盖率探索去避免陷入局部最优。AFLGO在这方面采取的策略是手动设定时间来区分exploration和exploitation阶段。这种方法需要对不同的程序有着很深的理解。为了解决这个问题，windranger采用动态切换的方式。</p>
+<p>具体来说，windranger保留所有的DBB，放在一个全局的集合中。在利用阶段，当集合中的所有DBB都利用的足够了，windranger切换到探索阶段。决定DBB是否利用足够了的指标是DBB被执行了多少次。具体的公式如下，T是fuzzing过程的基本块集合。DDB被执行的次数大于某个常数v乘以基本块里的最小执行次数就够了。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017165833265.png" alt="image-20221017165833265"></p>
+<p>至于探索阶段切换到利用阶段的话，如果windranger发现了新的DBB，就会切换到利用阶段。</p>
+<p>需要注意切换过程只在windranger完成变异后发生。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>主要包含两部分。静态分析器和动态的fuzzer。静态分析器部使用SVF构造过程间控制流图。主要写了900行的C&#x2F;C++代码。动态的fuzzer基于AFL，主要有1000行C代码。</p>
+<h2 id="实验结果及分析"><a href="#实验结果及分析" class="headerlink" title="实验结果及分析"></a>实验结果及分析</h2><p>实验方面主要针对以下四个问题：</p>
+<ul>
+<li>到达目标点的能力有多强？</li>
+<li>在复现目标漏洞方面的性能怎么样？</li>
+<li>每个组件对总体性能的影响如何？</li>
+<li>能否发现真实的漏洞？</li>
+</ul>
+<h3 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h3><p>使用以下三个benchmark：</p>
+<ul>
+<li>unibench：包含20个真实程序。从数据集中每个程序选4个目标，来评估不同技术到达目标的时间。</li>
+<li>AFLGo Test Suite是AFLGo挖到的0-day漏洞。这个数据集被用在很多工作里。</li>
+<li>Fuzzer Test Suite是Google提出的数据集。包含几个真实程序和漏洞信息，也广泛用在fuzzing的研究。</li>
+</ul>
+<p>对比的技术：</p>
+<ul>
+<li>AFLGo：目前最先进的定向模糊测试技术。其他的hawkeye，fuzzguard没开源。</li>
+<li>AFL：经典的覆盖率导向的模糊测试</li>
+<li>FairFuzz：选择这个是因为FairFuzz也使用了估计技术来收集污点信息构造fuzzing。</li>
+</ul>
+<p>评估指标：</p>
+<ul>
+<li>Time-To-Target：到达目标的时间。这个指标用来评估没有已知漏洞的benchmark上。</li>
+<li>Time-To-Exposure：触发目标漏洞的时间。用来评估有漏洞的benchmark。</li>
+</ul>
+<h3 id="RQ1：到达目标点的能力"><a href="#RQ1：到达目标点的能力" class="headerlink" title="RQ1：到达目标点的能力"></a>RQ1：到达目标点的能力</h3><p>现在暂时没有标准的数据集用来评估DGG到达目标的能力。为此，作者用unibench来构建评估TTT的数据集。</p>
+<ul>
+<li>对于每个程序，先用AFL跑24h，重复10次，在每次跑的时候，记录每个基本块第一次到达的时间。</li>
+<li>统计每个基本块的平均第一次到达时间。</li>
+<li>基于平均值，使用四个时间指标来选择基本块。</li>
+</ul>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017192625095.png" alt="image-20221017192625095"></p>
+<h3 id="RQ2-漏洞复现能力"><a href="#RQ2-漏洞复现能力" class="headerlink" title="RQ2 漏洞复现能力"></a>RQ2 漏洞复现能力</h3><p>作者发现在测试binutils的时候，冒出了很多其他的漏洞，但只有7个漏洞是用在实验里的。因此，作者用的是binutils 2.28，然后把对应的cve 反patch回去。就避免人工审计这些crash。这个思路其实被用在很多benchmark的构造上，比如magma，fixreverter。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017193237905.png" alt="image-20221017193237905"></p>
+<h3 id="RQ3-不同模块的影响"><a href="#RQ3-不同模块的影响" class="headerlink" title="RQ3 不同模块的影响"></a>RQ3 不同模块的影响</h3><p>作者把每个改的地方都关掉了，然后测试了下性能。发现各个模块都提高了10%左右的性能。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017194153448.png" alt="image-20221017194153448"></p>
+<h2 id="论文总结"><a href="#论文总结" class="headerlink" title="论文总结"></a>论文总结</h2><p>文章的核心思想是deviation basic block，然后围绕其在fuzz上做了一系列的优化。</p>
+<h2 id="自己的感受"><a href="#自己的感受" class="headerlink" title="自己的感受"></a>自己的感受</h2><p>读完论文后，自己的想法</p>
+<ul>
+<li><p>time-to-target的benchmark的设计挺好的。没有数据集就自己造。</p>
+</li>
+<li><p>论文结构也很清晰明了，非常标准，感觉下次写论文的时候可以参考这篇论文写。</p>
+</li>
+<li><p>修改模糊测试的模块部分，也值得借鉴学习。</p>
+</li>
+<li><p>感谢作者开源了自己的工具，感觉能从代码中学习到不少东西。</p>
+</li>
+</ul>
+<p>论文有哪些优点和亮点<br>论文还有哪些问题没有解决</p>
+<p>测试的大型程序还不是很多，可以看看大型程序上的效果如何。</p>
+<p>有哪些启发，可以继续探索</p>
+<ul>
+<li>exploitation和exploration的切换在代码中是怎么实现的</li>
+<li>种子选择是怎么实现的</li>
+<li>执行路径分析</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/10/13/Multiple%20Targets%20Directed%20Greybox%20Fuzzing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/13/Multiple%20Targets%20Directed%20Greybox%20Fuzzing/" class="post-title-link" itemprop="url">【论文笔记】Multiple Targets Directed Greybox Fuzzing</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-14 00:00:00" itemprop="dateCreated datePublished" datetime="2022-10-14T00:00:00+08:00">2022-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 15:59:16" itemprop="dateModified" datetime="2023-08-14T15:59:16+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Multiple-Targets-Directed-Greybox-Fuzzing"><a href="#Multiple-Targets-Directed-Greybox-Fuzzing" class="headerlink" title="Multiple Targets Directed Greybox Fuzzing"></a>Multiple Targets Directed Greybox Fuzzing</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>定向模糊测试可以快速地发现和复现程序中的bugs。然而，由于他们静态的状态的区分和粗粒度的能量调度，现有的DGF在面对多目标的时候，表现很差。</p>
+<p>本文提出了多目标定向灰盒测试，目的是探索程序的多个目标位置。具体来说，提出了一种新的策略来交互exploration和exploitation，以及一种考虑种子和目标位置关系的能量调度策略。</p>
+<p>并将以上方法实现为一个工具，叫做LeoFuzz，并评估其在crash reproduction，true positive verification，vulnerability exposure的表现。实验结果表示，LeoFuzz优于现有的六个模糊测试，QYSM，AFLGo，Lolly，Berry，Beacon和WindRanger。而且，在真实程序中发现了23个新的漏洞，其中11个获取了CVE ID。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>一个程序中通常会有多个漏洞存在。这种情况要用定向模糊测试找的话，有两种方法。</p>
+<ul>
+<li>开n个fuzzing的进程，然后给一个target，让定向模糊测试跑。</li>
+<li>给多个目标，直接给模糊测试跑。</li>
+</ul>
+<p>本文的目标是增强第二种方法的有效性和效率。</p>
+<p>现有定向模糊测试在处理多目标的时候，表现很差，原因在于两点：粗粒度的能量调度和静态化的状态划分。</p>
+<p>能量调度策略是用来控制种子变异的次数。在DGF中，调度策略会逐渐添加能量到距离目标更近的种子上，能够更快地触发目标位置。比如，AFLGo，给更多的能量到离所有目标近的种子，虽然这种策略使得AFLGo忽视了局部最优。</p>
+<p>问题1：为了覆盖更多的目标，就会追求对所有target的全局最优，而忽视了对于一些target的局部最优，从而导致一些目标很难到达。设计一种合理的能量调度算法，能够在有限的时间到达更多的target又是另外一个问题。</p>
+<p>DGF分为两个阶段运行，探索（exploration）和利用（exploitation）。在探索阶段，fuzzer通过种子变异来尽可能获取更大的代码覆盖率。在利用阶段，fuzzer变异并执行种子来使得种子离目标位置更近。比如，AFLGo从探索阶段开始，随机变异初始种子去生成新的输入，来增加代码覆盖率。在利用阶段生成更多新的输入离目标更近。然而，区分利用和探索的阶段是静态确定的。比如说，AFLGo设定用20小时去探索，然后用4小时去利用。这种静态切换的策略忽视了动态的运行信息，并且会影响AFLGo的性能。</p>
+<p>问题2：更少的探索会提供更少的覆盖率信息用来利用，使得在利用阶段更难生成高质量的种子。然而，过多的探索会消耗过多的资源，而且减少了利用的时间，缺少了定向性。因此，怎么动态地平衡二者的关系是一个挑战。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="静态分析"><a href="#静态分析" class="headerlink" title="静态分析"></a>静态分析</h3><p>静态分析分为两个部分：目标序列生成以及静态插桩。</p>
+<p>目标序列生成主要是给定一个target，生成target必经的序列。然后再由静态插桩，将对至少有一个target的基本块进行插桩。这样在运行时不仅可以获取覆盖率信息，也可以获取执行轨迹信息。</p>
+<p>目标序列生成类似Berry和Lolly。都是基于Dominator Tree生成。</p>
+<p>比如下面这个例子，给定目标点g，先通过调用图的支配树找到到达点g所在函数的必经调用链，然后在函数G里，再找必经基本块。最后串起来是：main1-&gt;A1-&gt;entry-&gt;a-&gt;f-&gt;g</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221012162057637.png" alt="image-20221012162057637"></p>
+<h3 id="动态分析"><a href="#动态分析" class="headerlink" title="动态分析"></a>动态分析</h3><p>总体算法思路挺清晰易懂的。首先根据stageCoord函数先确定是exploration还是exploitation。如果是exploration就从覆盖率队列取种子，反之从另外一个队列取种子。然后给种子赋予能量。在执行种子的过程中，如果发生崩溃，就送到崩溃种子集合里。反之，检查两个覆盖率的情况。如果目标序列的覆盖率增加了，就将变异后的种子加入到DQ序列，并更新dsc，csc和ndc的值。如果代码覆盖率增加了，就将变异后的种子加到CQ序列中，更新csc，ndc的值。如果都没增加就增加ndc的值。直到时间结束。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221013152909333.png" alt="image-20221013152909333"></p>
+<p>然后是状态切换的算法，如果是exploration状态，检查下csc&#x2F;(csc+dsc)是否大于某个值，大于就切换到exploitation阶段。csc表示覆盖率队列的长度，dsc表示定向队列的长度。这个条件说明当fuzzer有了足够多的覆盖率信息，就可以切换到利用状态了。如果一开始的话，是不是就直接切换到exploitation阶段了？当然作者马上给出了阶段，将初始的dsc设置为10，以防一开始就切换到exploitation阶段。另外这里的Rate的计算也是动态更新的。rate越大，在探索阶段的时间越大。为了平衡exploration和exploitation，使用下面的公式去更新Rate的值。cdsc&#x2F;根号t的值越大说明在利用阶段产生的种子越多，并且当前的代码覆盖率足够到达目标，需要更快切换到exploitation阶段。另外随着时间的增加，找到定向种子的概率也会变小，所以用epoch参数来调整这个影响。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221013160648507.png" alt="image-20221013160648507"></p>
+<p>如果是exploitation阶段，计算阈值th，如果ndc大于阈值th就切换到exploration状态。阈值的计算是看后两轮的exploitation阶段的ndc的值加起来乘以开根号的epoc再乘以1&#x2F;2.为啥这么算呢？作者认为ndc小于这个阈值的时候，就说明fuzzer的利用能力很弱了，需要切换到exploration阶段发现更多的路径。阈值这么设计是因为找到一个新的定向种子的可能性会在fuzzing的过程中下降，所以需要在每轮epoc中增加阈值的大小，来保证fuzzer能够在利用阶段更久一些。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221013153857719.png" alt="stageCoord"></p>
+<p>接下来是介绍种子能力调度的模块。</p>
+<p>对于一个种子和多个目标来说，LeoFuzz会在静态分析阶段生成所有的目标序列，并且在fuzzing阶段获取种子。文中考虑了三类种子和目标序列的关系。</p>
+<p>目标序列的优先级。能够说明目标序列和其他序列的<strong>相似性</strong>。LCS表示两个序列的最长公共子串。Max返回两个序列的最大长度。优先级越高表示有更多的机会可以通过变异到达多个目标。<strong>他的优先级是根据序列的简单程度来判断的。</strong></p>
+<p>目标序列的最大覆盖率。它表示任何执行轨迹的最大覆盖率。能够估计覆盖目标序列的难度，并且随着动态分析进行更新。</p>
+<p>种子序列覆盖率。它用来衡量种子执行轨迹和目标序列的相似度。</p>
+<p>基于上面三个指标，合成为一个指标CF，来用于后续的种子能量分配。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221013170954236.png" alt="image-20221013170954236"></p>
+<p>同样也是用模拟退火算法来寻找CF的全局最优。后面的思路基本类似AFLGo。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221013171101399.png" alt="image-20221013171101399"></p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221013171109788.png" alt="image-20221013171109788"></p>
+<p>另外，由于模糊测试通过变异难以到达较深的程序路径。为了解决这个问题，同样引入了concolic executor。利用concolic executor跑一遍种子，然后生成新的种子。种子主要是从DQ队列中取。</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>主要讨论这六个问题：</p>
+<ul>
+<li><p>Leofuzz在一个target的时候效果如何？</p>
+<ul>
+<li>连单一的target的效果都好。这个target怎么设定的，存在疑惑。</li>
+</ul>
+</li>
+<li><p>在crash reproduction这个应用效果如何？</p>
+</li>
+<li><p>多个target的时候效果咋样？</p>
+<ul>
+<li>多个target怎么来的没说。</li>
+</ul>
+</li>
+<li><p>true positive的验证效果如何？</p>
+<ul>
+<li>用的libming 来做实验。target来源于clang static analyzer</li>
+<li>基本时间在一个小时以内。只验证了libming？不知道其他的效果如何？</li>
+</ul>
+</li>
+<li><p>能否发现未知漏洞</p>
+<ul>
+<li>在cxxfilt 2.36，SWFTools 和 libredwg里发现了11个0 day漏洞。</li>
+</ul>
+</li>
+<li><p>哪些设计影响了最后效果?</p>
+</li>
+</ul>
+<p>主要考虑了四个决策对最后结果的影响。</p>
+<ul>
+<li>target sequence enhancement</li>
+<li>exploration exploitation coordination</li>
+<li>fine-grained energy scheduling strategy </li>
+<li>concolic execution</li>
+</ul>
+<p>最后贡献度排名是：MES&gt;CEE&gt;target sequence enhancement &gt; concolic execution</p>
+<p>concolic execution提升小反而是没想到的。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><p>AFLGo是第一个定向模糊测试，它的模拟退火能量调度策略会分配更多能量给离目标位置近的种子。基于AFLGo，Hawkeye支持间接调用，并调整了AFLGo的种子选择，能量调度和变异策略。然而AFLGo和Hawkeye都不支持多目标。同样，基于AFLGo，RDFuzz通过结合到目标点的距离以及路径的频率，并使用静态调度模块来协调exploration和exploitation。</p>
+<p>也有一些定向模糊测试使用sanitizer的输出来指导fuzzing。SAVIOR使用了UBSan的输出作为目标点。然后基于种子遇到的新分支和在这些分支上的目标点和求解分支约束的难易度来计算种子的能量。ParmeSan利用多个sanitizers报告的error和warning来作为目标点，并且用种子到目标的距离来指导模糊测试。LeoFuzz也可以使用sanitizers的结果作为target。</p>
+<p>另外一些定向模糊测试使用数据流分析。CAFL目标是满足一序列的约束条件，然后优先选择最适合这些条件的种子。它定义了一个单一目标点的约束条件以及一些可选的数据条件。CAFL需要额外的信息源，比如内存检测器的crash dump或者补丁的changelogs。WindRanger使用基本块的deviation和他们的数据流信息来计算种子的距离。他也会动态的在exploration和exploitation切换。Beacon使用静态的方法提前识别出不可达的路径。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从这篇文章看得出来，作者用了很多他自己以前工作的东西。比如dominator tree，LCS，混合测试等等。</p>
+<p>实验做的很充分。还发现了许多0day漏洞。从时间来看，在2021年就挖到了不少cve，22年的6月投稿TDSC。看得出来工作量蛮大的。</p>
+<p>作者前面几篇发的论文berry和lolly也用在本次的对比试验了。作者这个技术路线还是挺清晰的，值得学习。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/10/10/Effective%20Seed%20Scheduling%20for%20Fuzzing%20with%20Graph%20Centrality%20Analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/10/Effective%20Seed%20Scheduling%20for%20Fuzzing%20with%20Graph%20Centrality%20Analysis/" class="post-title-link" itemprop="url">【论文笔记】Effective Seed Scheduling for Fuzzing with Graph Centrality Analysis</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-11 00:00:00" itemprop="dateCreated datePublished" datetime="2022-10-11T00:00:00+08:00">2022-10-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 15:57:38" itemprop="dateModified" datetime="2023-08-14T15:57:38+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Effective-Seed-Scheduling-for-Fuzzing-with-Graph-Centrality-Analysis"><a href="#Effective-Seed-Scheduling-for-Fuzzing-with-Graph-Centrality-Analysis" class="headerlink" title="Effective Seed Scheduling for Fuzzing with Graph Centrality Analysis"></a>Effective Seed Scheduling for Fuzzing with Graph Centrality Analysis</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>种子调度，用来确定种子选择的顺序，很大影响了fuzzer的性能。现有的方法利用历史变异信息来调度，但是忽视了控制流图的结构。检查CFG可以帮助种子调度从变异种子上提高边的覆盖率。</p>
+<p>一个理想的策略是基于种子通过突变产生的所有可达和可行边的数量来调度种子。但是计算所有边的可达性的开销很大。因此，种子调度策略需要估计这个数量。作者发现估计的count需要满足三个属性：</p>
+<ul>
+<li><p>当一个种子可以到达更多的边的时候，count需要增加</p>
+</li>
+<li><p>当一个历史变异信息提示边很难到达的时候或者边离当前访问的边很远的时候，count需要减少</p>
+</li>
+<li><p>需要在大型CFG中进行计算。</p>
+</li>
+</ul>
+<p>作者观察到图分析里的中心性提供了这三个属性，因此可以高效地估计到达未访问边的概率。然后，构建一种名为edge horizon 的图，能够连接种子到他们最近的未访问节点，然后计算种子的中心性去测量变异一个种子的边覆盖率增量（gain）。</p>
+<p>作者实现了他们的方法，叫做K-Scheduler，并且和其他著名的种子调度策略比较。发现K-Scheduler在12个谷歌的fuzzbench上，相比Entropic提高了25.89%的特征覆盖率，比next-best AFL-Based调度器的边覆盖率要高4.21%。同样也发现了3个未知的漏洞。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>给定目标程序，种子语料库和程序的过程间控制流图。基于控制流图先生成edge horizon graph。这个图只包含种子，horizon和non-horizon未访问的节点。然后对edge horizon graph计算Katz中心性。然后fuzzer会优先变异更高中心性的种子。后续fuzzer访问到了这些之前没访问过的节点后，就删除这些新访问的节点，然后重新在更新后的edge horizon graph上计算Katz 中心性。</p>
+<p>图a是最左边小程序的控制流图。图b是edge horizon graph。节点A和B是horizon node，因为他们是未访问的节点，且他们的父节点是访问过的。然后把种子节点插入到CFG中，然后将他们与horizon node相连。与之相连的horizon node的父节点需要在种子的执行路径上。所以a&#x3D;5，b&#x3D;30这一种子只与A节点相连。最后删除掉所有已访问过的节点。<img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221011155104202.png" alt="image-20221011155104202"></p>
+<p>katz中心性计算如下：使用β来表示通过变异到达一个节点的难易程度。例如，在100次变异过程中，70次到达了horizon node A的父节点，30次到达了horizon node B的父节点，所以A的β值为1-0.7&#x3D;0.3，B的值为0.7。这说明节点A更难到达。Katz中心性也会随着节点越远而减少。中心性的计算采取迭代的方式计算，最终会收敛。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221011160600975.png" alt="image-20221011160600975"></p>
+<p>论文中还介绍了如何构造Edge horizon graph，如何计算Katz 中心性以及实际是如何应用到fuzz中的。对这部分内容感兴趣的可以去看原文。本文就不再赘述了。</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>结果部分主要回答以下五个问题：</p>
+<ol>
+<li>和其他的调度策略相比如何？</li>
+<li>能否提高fuzzer发现漏洞的能力</li>
+<li>运行时的开销如何？</li>
+<li>K-Scheduler的各种设计选择会如何影响他的性能</li>
+<li>能否应用到非进化算法的模糊测试中？</li>
+</ol>
+<h3 id="问题1：和其他的调度策略相比如何？"><a href="#问题1：和其他的调度策略相比如何？" class="headerlink" title="问题1：和其他的调度策略相比如何？"></a>问题1：和其他的调度策略相比如何？</h3><p>第一个表是跑1小时，第二个表是跑24小时。整体上的覆盖率都是高的。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221011171634569.png" alt="image-20221011171634569"></p>
+<p>作者认为他们的工作能在前期有个比较好的提升。随着时间的增加，entropic也会分配能量到那些好的种子上去，从而就缩小了差距。</p>
+<p>对比AFL上实现的工作，感觉在1h增加的覆盖率更高一些。AFL上增加的幅度实际上不是很大。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221011172559280.png" alt="image-20221011172559280"></p>
+<h3 id="问题2：能否提高fuzzer发现漏洞的能力"><a href="#问题2：能否提高fuzzer发现漏洞的能力" class="headerlink" title="问题2：能否提高fuzzer发现漏洞的能力"></a>问题2：能否提高fuzzer发现漏洞的能力</h3><p>能比最好的多找3个。作者计算漏洞的数量是先用AFL-Cmin去减少崩溃输入的数量。然后通过stack traces进一步过滤。最后追踪剩下的崩溃输入，并且人工检查他们的stack traces和源码。</p>
+<p><img src="C:\Users\zhang\AppData\Roaming\Typora\typora-user-images\image-20221011173051707.png" alt="image-20221011173051707"></p>
+<h3 id="3-运行开销"><a href="#3-运行开销" class="headerlink" title="3. 运行开销"></a>3. 运行开销</h3><p>运行开销主要分为</p>
+<ul>
+<li>fuzzer记录边命中的数量和计算种子能量</li>
+<li>调用K-Scheduler来调度种子</li>
+</ul>
+<p>运行开销不大，看起来可以忽略不计。开销和程序CFG节点的数量有关。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221011173756162.png" alt="image-20221011173756162"></p>
+<h3 id="4-哪些参数会影响"><a href="#4-哪些参数会影响" class="headerlink" title="4. 哪些参数会影响"></a>4. 哪些参数会影响</h3><p>1）中心性算法：对比了PageRank，Eigenvector,Degree,Katz这几种</p>
+<p>2）Katz的β，α参数的影响。（有点像调参出来的）</p>
+<p>3）删除已访问的节点：虽然文章没说原因，感觉是减少了运行开销，所以最后的覆盖率增加了。</p>
+<p>4）Loop removal：引入了loop removal transform来缓解循环对中心性计算的影响。</p>
+<h3 id="5-应用到QSYM上"><a href="#5-应用到QSYM上" class="headerlink" title="5. 应用到QSYM上"></a>5. 应用到QSYM上</h3><p>作者把k-scheduler整合进QSYM中，发现也提高了不少覆盖率。但是实验结果还比较初步，准备留到未来再详细讨论。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><p>相关工作部分主要讲了图中心性和种子调度这两方面。</p>
+<h3 id="图中心性"><a href="#图中心性" class="headerlink" title="图中心性"></a>图中心性</h3><p>图中心性列举了不少指标，包括degree centrality, semi-local centrality, closeness centrality, betweenness centrality, eigenvector centrality, katz centrality, PageRank。这些中心性指标已经被应用到各种领域，比如社交网络分析，生物，经济和地理等等。作者认为他们是第一个用在fuzzing的种子选择里。</p>
+<h3 id="种子调度"><a href="#种子调度" class="headerlink" title="种子调度"></a>种子调度</h3><p>种子调度包含两部分主要模块：种子选择和能量调度。</p>
+<p>前人工作在选择种子上，有利用边和路径覆盖率的，也有用一些安全敏感的指标，比如执行时间，可利用性，内存访问或者他们的组合。另一类选择种子的工作是基于调用图。而作者的工作是基于完整的过程间的控制流图。AFLGo也基于完整的过程间控制流图，不过他计算的是距离，并且用来作定向模糊测试。而本文侧重的是增加覆盖率。SAVIOR也估计这个分数，不过是用在bug-driven的混合测试里。他的假设是所有的边都是同等可到达的，也不管种子执行路径的距离。这个假设和真实程序的场景不太吻合。不管哪个，都用了变异的历史信息来优化这个估计过程。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>文章提出的horizon node graph的图很有意思。并且katz中心性是可以根据fuzzer状态动态更新的。这点或许可以借鉴。</p>
+<p>实验部分也做得好扎实，足足有7页，再加上一大堆图表。就是对benchmark程序的选择有些疑惑。没明白为什么选这些程序。虽然提到了未来要测试所有的程序。</p>
+<p>开源于：<a target="_blank" rel="noopener" href="https://github.com/Dongdongshe/K-Scheduler">https://github.com/Dongdongshe/K-Scheduler</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/08/30/LibAFL-%20A%20Framework%20to%20Build%20Modular%20and%20Reusable%20/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/08/30/LibAFL-%20A%20Framework%20to%20Build%20Modular%20and%20Reusable%20/" class="post-title-link" itemprop="url">【论文笔记】LibAFL, A Framework to Build Modular and Reusable Fuzzers</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-08-30 15:30:00" itemprop="dateCreated datePublished" datetime="2022-08-30T15:30:00+08:00">2022-08-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 15:57:06" itemprop="dateModified" datetime="2023-08-14T15:57:06+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="LibAFL-A-Framework-to-Build-Modular-and-Reusable-Fuzzers"><a href="#LibAFL-A-Framework-to-Build-Modular-and-Reusable-Fuzzers" class="headerlink" title="LibAFL: A Framework to Build Modular and Reusable Fuzzers"></a>LibAFL: A Framework to Build Modular and Reusable Fuzzers</h1><p>简介：</p>
+<p>AFL是软件安全测试领域的一个重要里程碑，使得fuzzing成为了一个主要的研究领域，并带动了大量的研究去提高fuzzing流水线上的各个方面。</p>
+<p>许多研究是通过fork AFL的代码来进行实现的。虽然一开始看起来挺合适的，但是要把多种fork合并到一个fuzzer，需要大量的工程开销，阻碍了不同技术客观和公正的评估。严重碎片化的fuzzing的生态阻止了研究者组合多种技术来实现新的原型系统。</p>
+<p>为了解决这个问题，这篇文章提出了LibAFL，一个框架来构建模块化和可重用的fuzzer。文章讨论了fuzzing中的不同模块，并将其映射到一个可扩展的框架中去。LibAFL允许研究者和工程师去扩展核心的fuzzer流水线，同时可以分享他们的模块，以便未来的评估。作为LibAFL的一部分，作者已经整合了20多个前人的工作，并且做了相当多的实验来显示我们框架在整合评估不同方法的有效性。作者希望这能够帮助fuzzing领域进步，同时为未来可比较性和可扩展的研究打下基础。</p>
+<h2 id="fuzzing的9个模块"><a href="#fuzzing的9个模块" class="headerlink" title="fuzzing的9个模块"></a>fuzzing的9个模块</h2><p>input：程序的输入，或者从外部获取的数据，输入到系统中，影响了系统的行为。这样的数据就是输入。</p>
+<p>作者将输入（Input）定义为程序输入的内部表示。举个简单的例子，程序的输入就是一个单字节数组。许多fuzzer直接存储并操作字节数组，并把结果传到目标程序。</p>
+<p>然而，字节数组并不是输入的理想表示形式。就比如，如果目标程序希望接受一系列的系统调用的话，字节数组就不合适了。另外一种方式是把输入存储为抽象语法树（AST）的形式，这样可以保留语法信息。还有其他的工作是把输入处理为一序列的tokens或者语言的IR。</p>
+<p>Corpus：输入的存储以及关联的元数据。不同的存储会影响fuzzer的能力，比如，corpus存在内存中，会使得fuzzer运行很快，但是同时也会很快消耗完内存。而存储在disk的corpus虽然也可以检查fuzzer的状态，但是会引入disk操作的开销。</p>
+<p>主流的fuzzer都存在disk，但这个选择影响了并行fuzzing的扩展性，并且需要标准库来实现文件IO的操作。</p>
+<p>在libafl的模型中，一个fuzzer至少需要两个单独的corpora，一个用来存储有趣的测试样例，作为fuzzer进化算法的组件。另一个用来存储solutions，也就是满足fuzzer目标的测试样例，例如导致程序崩溃的crash。</p>
+<p>Scheduler：调度器是和corpus紧密连接的一个模块。这个模块主要是告诉fuzzer下一个要fuzz的测试样例。最原始的调度器的实现有FIFO（先进先出）或者随机选择。更复杂的调度去可能会使用一些概率算法或者应用其他的调度器到corpus的子集里去。</p>
+<p>Stage：stage是一个组件，定义了从corpus操作测试样例的一个行为。通常来说，调度器选择了一个测试样例后，fuzzer会在每个阶段执行给定的输入。Stage是一个很广的实体，通常作为唤起变异器的组件（random，havoc stage in AFL）</p>
+<p>另外一个很知名的stage是最小化的过程。他主要是把测试样例的大小弄小，同时不改变测试样例的覆盖率。</p>
+<p>Observer：观察器从目标程序的执行中提供信息。比较知名的观察器就是覆盖率映射表。这个映射表包含了执行过的每一条边。这个信息不会被多次运行的时候保持不变，他是程序的动态属性。（AFL的bitmap）</p>
+<p>Executor：主要负责执行目标程序。在作者的模型中，执行器不仅是如何执行目标程序，也包括所有执行过程中的非法操作。所以执行器负责告诉程序关于fuzz想要用的输入。</p>
+<p>Feedback：反馈是用来区分程序的执行的输出是否有趣。理论上，这个信息用来确定对应的输入是否被加到corpus中。大多数情况下，feedback和observer是深度关联的。但是这两个是不同的概念。事实上，feedback通常处理多个观察器传来的信息来确定执行是否是有趣的。而有趣这个概念是很抽象的，通常可以理解为是否发现了新的东西（比如发现了新的边）。</p>
+<p>识别有趣输入的过程在fuzzing中也有第二个重要目标，找到能够满足特定的属性的solution，比如目标程序中一个可观测到的crash。</p>
+<p>Mutator：将一个输入或者多个输入变成新的输入。变异器可以组合多个其他的变异器，并且通常与一个特定的输入类型有关。在传统的fuzzer里，变异器包含许多位级别的操作，比如位翻转或者基本块交换。一个变异器也可以依据输入格式来变异。比如通过交换AST树上的一个节点来实现变异。</p>
+<p>Generator:从scratch中生成一个新的输入。例如NAUTILUS使用基于语法的生成器创建初始的corpus和子树生成器作为它的语法变异器。</p>
+<h2 id="框架结构"><a href="#框架结构" class="headerlink" title="框架结构"></a>框架结构</h2><h3 id="设计理念和顶层设计"><a href="#设计理念和顶层设计" class="headerlink" title="设计理念和顶层设计"></a>设计理念和顶层设计</h3><p>LibAFL的目的是构建一种基于可重用组件和可靠、快速和可扩展的先进技术的模块化设计的新时代fuzzer。</p>
+<p>libafl的框架基于三个关键原则：</p>
+<ol>
+<li><p>Extensibility：允许用户交换第三章介绍的实体的不同实现，而不需要改动其他的部分。这样可以允许不同的技术融合到一起。</p>
+</li>
+<li><p>Portability：大多数的fuzzer是操作系统特定的。要不只能对unix程序，要不是windows。为了避免这个缺点，libafl以一种不依赖系统的方式来设计核心库。而且，为了最大化可移植性，实现了LibAFL的子集，包含了所有的核心组件，而不需要任何标准库的依赖。因此，可以让用户对bare-metal目标（比如嵌入式系统、内核）写fuzzer。</p>
+</li>
+<li><p>Scalability：设计的选择不能和fuzzer的多核运行的特性相矛盾。因为这点，libafl设计了一个基于事件的接口，能够在fuzzer之间相互通信。</p>
+</li>
+</ol>
+<p>libfuzzer虽然能够在不同的操作系统上用，但是不能不需要标准库来进行编译。AFL自身是基于disk进行IO通信，同时用了大量的系统调用，比如fork，导致其扩展到多核上的效果不好。其他扩展性更好的方案，比如HONGGFUZZ依然是基于系统调用来控制目标并且在多个并行的线程中保留一个共享的状态。</p>
+<p>为了创建一个fuzzing的框架，能够满足上面的三个目标，围绕三个核心库设计了LibAFL。</p>
+<ul>
+<li><p>LibAFl Core是主要的库，包含fuzzing的组件和他们相应的组件。这个库的大部分都依赖于Rust core+alloc，因此，可以在没有标准库的情况下运行。</p>
+</li>
+<li><p>LibAFL Targets包含了在目标程序里的代码。比如用来追踪覆盖率的运行时的库。</p>
+</li>
+<li><p>LibAFL CC提供了函数来写编译器的wrapper，方便用户来进行插桩。</p>
+</li>
+</ul>
+<p>除了这三个核心库，也包含插桩后端提供API来让libafl可以应用到不同的执行引擎，比如QEMU和Frida。</p>
+<h3 id="核心库"><a href="#核心库" class="headerlink" title="核心库"></a>核心库</h3><p>libafl的核心架构如下图所示：</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image_E6o7fCJS8U.png"></p>
+<p>大部分的组件都是和前面的实体是一对一映射的关系。有三个多出来的组件是：State、Fuzzer和Events Manager。</p>
+<p>每个组件都映射为一个Rust的泛型特征，运行它和其他不同的组件进行组合。</p>
+<p>Zero-cost Abstraction Extensibility的代价是引入抽象，通常会影响性能。由于性能对于fuzzing的影响很大，libafl的设计是一种灵活的抽象，而且不会在运行时引入很大的开销。</p>
+<p>在初期的测试阶段，libafl的作者没有选择传统的面向对象的模式，而是使用泛型特征。所以使用rust语言的设计，来让编译器做进一步的优化。</p>
+<p>选择Rust的两个原因：</p>
+<ul>
+<li><p>编译器优化友好</p>
+</li>
+<li><p>相当内联</p>
+</li>
+</ul>
+<p>State 是所有合法数据在的地方。所有进化算法的数据都存在state里，比如执行的次数，伪随机数，语料库。</p>
+<p>由于一些类型的反馈也需要保存状态，比如覆盖率。因此，libafl引入了FeedbackState组件来连接State和Feedback。feedback状态的实例包含在状态里，并且在fuzzing过程的开始就生成了。</p>
+<p>找个地方放置fuzzer的数据主要是利用Rust的序列化的特性。序列化和去序列化一个状态，能够让基于libafl的fuzer在内部的某个特定状态停止和重启。</p>
+<p>Fuzzer是一个定义fuzzer能做什么的容器。它包含feedback，objectives，scheduler，以及其他可能改变fuzzer状态的操作。这些来自fuzzer的过程被隔开了，为的是遵守Rust语言的借用规则。遵守借用规则是以防一些操作同时改变了fuzzer和state。</p>
+<p>fuzzer的主要功能：</p>
+<ul>
+<li><p>FuzzOne：一个测试样例要如何处理</p>
+</li>
+<li><p>InputEvaluation：如何评估一个新的输入</p>
+</li>
+</ul>
+<p>EventManager：创建和处理事件的一个接口，可以用来实现多核fuzzer或者单纯的日志记录。</p>
+<p>MetadataSystem：fuzzing算法经常需要一个测试样例的其他数据，或者fuzzer的全部状态。因此，libafl需要提供一种方式来扩展测试样例的数据和在状态里的数据。</p>
+<p>为了提供这种扩展能力，同时保证简单和性能，libafl设计了一个元数据系统。同时，测试样例和状态保留了一个映射表，作为这个元数据的扩展容器。这样的话，不同但是相关的模块可以操作同一个元数据，并且可以忽视其他模块对元数据的处理。这是libafl唯一引入的一点运行开销的地方，主要是由于映射表的查询导致的。</p>
+<p>Composable Feedbacks 。一个fuzzer可能需要组合多种feedbacks来评估给定的输入有多有趣。libafl里通过使用逻辑运算符来组合feedback。比如，要对crash进行去重的话，并且收集两种反馈，一个是认为导致崩溃的输入是有趣的，另一个是触发了一个新的栈的路径。这种情形下，可以通过使用逻辑运算符AND来组合这两种反馈，从而实现crash的去重。</p>
+<p>Monitor。最后一个fuzzer的组件是监控器。它的功能主要是保留触发事件的数据以及展示给用户。</p>
+<h3 id="插桩后端"><a href="#插桩后端" class="headerlink" title="插桩后端"></a>插桩后端</h3><p>libafl也可以很容易地导入其他的插桩后端，比如二进制翻译器，或者一个简单的编译插桩的pass。默认情况下，libafl提供了额外的库来与一些知名的插桩后端相联，比如LLVM，SanitizerCoverage，Qemu usermode和Frida。</p>
+<p>除了上面这几个，还提供了concolic execution。因此也整合了SymCC和SymQEMU。</p>
+<p>目前已部分支持TinyInst去对windows，macOS的程序进行插桩，以及NYX这个hypervisor级别的快照fuzzing。</p>
+<h2 id="5-应用与实验"><a href="#5-应用与实验" class="headerlink" title="5 应用与实验"></a>5 应用与实验</h2><p>实验部分主要针对四个问题进行评估：</p>
+<ul>
+<li><p>roadblocks bypassing</p>
+</li>
+<li><p>structure-aware fuzzing</p>
+</li>
+<li><p>corpus scheduling</p>
+</li>
+<li><p>energy assignment</p>
+</li>
+</ul>
+<p>主要是看libafl在这四个问题上的表现效果。下面的表格列举了目前libafl支持的一些特性。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image_wD-5CXP0uL.png"></p>
+<h3 id="5-1-Bypassing-Roadblocks"><a href="#5-1-Bypassing-Roadblocks" class="headerlink" title="5.1 Bypassing Roadblocks"></a>5.1 Bypassing Roadblocks</h3><p>bypassing roadblocks指的是通过绕过很难求解的约束来增加代码覆盖率。比如，多字节比较对于通过随机的遗传变异是很难绕过的。因为解空间很大，盲目地猜测是不切实际的。Libafl提供了几种现有的技术来绕过这些roadblocks。</p>
+<ul>
+<li><p>value-profile（libfuzzer）：通过最大化两个指令的操作数的匹配的位来求解比较指令</p>
+</li>
+<li><p>cmplog（AFL++）：通过找到并替换input-to-state values。对比较指令和将两个指针作为参数的函数进行插桩。并且在运行时记录相关的值到映射表。然后变异器匹配输入的模式，并用比较指令另一个操作数的值替代输入。</p>
+</li>
+<li><p>autotokens（AFL++）：从比较指令中提取tokens，从函数中提取立即数，编码到二进制的段里。然后把这些token放在状态的元数据字典里，然后在变异器使用这些tokens。由于这种方法不引入开销，所以将这种方法作为baseline。</p>
+</li>
+</ul>
+<p>最后的实验结果是cmplog（95.94）&gt;value_profile_complog（95.03） &gt; plain（94.65） &gt; value_profile（90.13）。</p>
+<h3 id="5-2-Structure-aware-Fuzzing"><a href="#5-2-Structure-aware-Fuzzing" class="headerlink" title="5.2 Structure-aware Fuzzing"></a>5.2 Structure-aware Fuzzing</h3><p>基于遗传算法的变异器对于一些结构化的输入表现不好。针对这个问题，一种解决方法是让fuzzer意识到输入的格式。Libafl也提供了几种现有的技术，来处理结构化的输入。</p>
+<ul>
+<li><p>NAUTILUS：一种基于语法的覆盖率导向的fuzzer。他的核心思想是在语法树上进行变异。</p>
+</li>
+<li><p>GRAMATRON：利用一种grammar-to-automata的转换方法来实现高效的变异器。</p>
+</li>
+<li><p>GRIMOIRE：使用那些会增加覆盖率的部分输入作为tokens来构建树形的输入，并且做grammar-like的变异。他原本是对JavaScript语言进行fuzz的，但是libafl的实现是通用的，并且可以用到任何语言。</p>
+</li>
+</ul>
+<p>评估这些方法的指标为未覆盖的bug的数目。因为这类fuzzer的有效性并不依赖于代码覆盖率。</p>
+<p>实验结果如下，grimoire的表现效果最好。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image_ruM4Zc3MPF.png"></p>
+<p>除此之外，作者还将前面实验表现不好的nautius与一个不相关的技术MOPT结合，来看二者结合的效果，实验如下图所示。总体来说，MOPT的效果与目标程序有很大的关系。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image_b7LyMnTdOe.png"></p>
+<h3 id="5-3-Corpus-Scheduling"><a href="#5-3-Corpus-Scheduling" class="headerlink" title="5.3 Corpus Scheduling"></a>5.3 Corpus Scheduling</h3><p>从语料库中选择哪一个测试样例来用是许多研究的重点。最简单的是随机选择或者FIFO队列。libafl提供了这两种方法，也包括其他的调度器。</p>
+<ul>
+<li><p>MinimizerScheduler（AFL）：基于执行速度和输入的长度，同时保持最大的覆盖率来选择种子。</p>
+</li>
+<li><p>weighted（AFL++）：基于概率进行抽样，概率的分数使用各种指标，包括执行的时间，覆盖率映射表的大小。</p>
+</li>
+<li><p>accounting（TORTOISEFUZZ）：使用三种安全影响指标来选择输入，基本块和函数粒度级别的内存操作，loop back edges（回到循环的边）的数目。</p>
+</li>
+</ul>
+<p>实验结果：weighted&gt;minimizer&gt;accounting&gt;rand</p>
+<p>并且这几个差别不是很大。尽管有相当多的研究在做这个问题。</p>
+<p>作者认为可能是libafl的吞吐量很大，导致是在这些程序上运行的很快，因此就看不出差别。</p>
+<h3 id="5-4-Energy-Assignment"><a href="#5-4-Energy-Assignment" class="headerlink" title="5.4 Energy Assignment"></a>5.4 Energy Assignment</h3><p>能量分配主要是回答一个输入需要变异多少次生成一个测试样例的问题。最原始的方法是使用一个常数值。最常见的简单的方法是根据时间间隔来分配一个随机值。libafl提供了这种方法，名为plain。AFLFast工作里提出了六种不同的算法：exploit，explore，coe，fast，lin和quad。</p>
+<p>实验结果：explore&gt;fast&gt;plain&gt;coe</p>
+<p>同样，他们的区别很小。</p>
+<h3 id="5-5-通用的bit-level-Fuzzer"><a href="#5-5-通用的bit-level-Fuzzer" class="headerlink" title="5.5 通用的bit-level Fuzzer"></a>5.5 通用的bit-level Fuzzer</h3><p>这部分就把前面的四个问题里最好的技术整合到一起，和其他成熟的fuzzer（AFL++，Honggfuzz，libfuzzer）进行评估。</p>
+<p>总体上效果要优于现有的fuzzer。</p>
+<p>具体的实验结果在该网址可以看到：<a target="_blank" rel="noopener" href="https://www.fuzzbench.com/reports/experimental/2022-04-11-libafl/index.html" title="https://www.fuzzbench.com/reports/experimental/2022-04-11-libafl/index.html">https://www.fuzzbench.com/reports/experimental/2022-04-11-libafl/index.html</a></p>
+<h3 id="5-6-Differential-Fuzzing"><a href="#5-6-Differential-Fuzzing" class="headerlink" title="5.6 Differential Fuzzing"></a>5.6 Differential Fuzzing</h3><p>作者为了证明libafl不止可以用于构建基于覆盖率导向的模糊测试。亲身用两天，900行代码复现了NeoDiff。这是一个对比的模糊测试，面向的是以太坊虚拟机。</p>
+<p>NeoDiff，原本是基于python写的，会去比较基于同样的输入比较两个以太坊虚拟机的执行结果。具体来说，它使用了状态哈希的方法。就是将寄存器的值，内存和栈上每个指令的概率抽样进行哈希。它使用的反馈是类型哈希（type hash），操作码的哈希以及每个指令在栈上前两个东西的类型。任何输入产生了新的类型哈希，就会被加入到语料库中。</p>
+<p>并且，作者拿基于libafl复现的NeoDIFF与原始版本对比实验结果，发现libafl的效果要比原本的好很多。作者认为是语言实现上的问题，rust实现要比python实现的好很多。</p>
+<h3 id="5-7第三方应用"><a href="#5-7第三方应用" class="headerlink" title="5.7第三方应用"></a>5.7第三方应用</h3><p>libafl已经被很多新用户使用了。这些用户之前没有使用这些框架的经验。</p>
+<ol>
+<li><p>TLSPUFFIN：结合fuzzing和模型测试，实现了对TLS协议的fuzzer。</p>
+</li>
+<li><p>TARTIFLETTE：基于KVM的快照fuzzer。提供了一种新的执行器，通过系统调用模拟和覆盖率追踪的插桩来将Linux ELF当作是VM进行运行。</p>
+</li>
+<li><p>NANAFZZ：检查竞态条件的漏洞的fuzzer。</p>
+</li>
+</ol>
+<h2 id="6-局限性"><a href="#6-局限性" class="headerlink" title="6 局限性"></a>6 局限性</h2><p>没有包含Link Time Optimization pass来构建程序的控制流图，导致不支持大部分的定向模糊测试。</p>
+<p>libafl提供了强大的concolic tracing的API，可以用来扩展SymCC和SymQEMU来过滤约束和符号路径通信。目前，libafl使用Z3来生成新的测试样例。然而传统的concolic fuzzer的缺陷，这个框架也不能解决。主要原因是：</p>
+<ol>
+<li><p>求解器时间开销和资源开销都很大。</p>
+</li>
+<li><p>fuzzer和concolic结合的并不好。即使当一个求解器生成了复杂约束的测试样例，也很难让fuzzer去变异生成的测试样例，而不去破坏求解出来表达式的合法性。</p>
+</li>
+</ol>
+<p>最后是关于这篇论文的一些链接：</p>
+<ul>
+<li><p>libafl的github仓库：<a target="_blank" rel="noopener" href="https://github.com/AFLplusplus/LibAFL" title="https://github.com/AFLplusplus/LibAFL">https://github.com/AFLplusplus/LibAFL</a></p>
+</li>
+<li><p>论文地址：<a target="_blank" rel="noopener" href="https://www.eurecom.fr/publication/6973/download/sec-publi-6973.pdf" title="https://www.eurecom.fr/publication/6973/download/sec-publi-6973.pdf">https://www.eurecom.fr/publication/6973/download/sec-publi-6973.pdf</a></p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/05/22/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E6%95%B0%E9%87%8F%E8%AF%8D%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/22/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E6%95%B0%E9%87%8F%E8%AF%8D%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">【日语N5】数量词整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-22 09:33:29 / 修改时间：19:47:26" itemprop="dateCreated datePublished" datetime="2022-05-22T09:33:29+08:00">2022-05-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="【日语N5】数量词整理"><a href="#【日语N5】数量词整理" class="headerlink" title="【日语N5】数量词整理"></a>【日语N5】数量词整理</h1><p>数量相关的单词比较烦，所以打算整理下这些词汇，包括1-10，几个，星期几，几月等等的单词。</p>
+<table>
+<thead>
+<tr>
+<th>数量</th>
+<th>片假名</th>
+<th>日期</th>
+<th>几个</th>
+<th>几人</th>
+<th>几分</th>
+<th>几时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>いち</td>
+<td>ついたち</td>
+<td>ひとつ</td>
+<td>ひとり</td>
+<td>いっぷん</td>
+<td>いちじ</td>
+</tr>
+<tr>
+<td>2</td>
+<td>に</td>
+<td>ふつか</td>
+<td>ふたつ</td>
+<td>ふたり</td>
+<td>にふん</td>
+<td>にじ</td>
+</tr>
+<tr>
+<td>3</td>
+<td>さん</td>
+<td>みっか</td>
+<td>みっつ</td>
+<td></td>
+<td>さんぷん</td>
+<td>さんじ</td>
+</tr>
+<tr>
+<td>4</td>
+<td>よん／し</td>
+<td>よっか</td>
+<td>よっつ</td>
+<td>よにん</td>
+<td>よんぷん</td>
+<td>よんじ</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ご</td>
+<td>いつか</td>
+<td>いつつ</td>
+<td></td>
+<td>ごふん</td>
+<td>ごじ</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ろく</td>
+<td>むいか</td>
+<td>むっつ</td>
+<td></td>
+<td>ろっぷん</td>
+<td>ろくじ</td>
+</tr>
+<tr>
+<td>7</td>
+<td>なな　&#x2F;しち</td>
+<td>なのか</td>
+<td>ななつ</td>
+<td></td>
+<td>ななふん</td>
+<td>しちじ</td>
+</tr>
+<tr>
+<td>8</td>
+<td>はち</td>
+<td>ようか</td>
+<td>やっつ</td>
+<td></td>
+<td>はっぷん</td>
+<td>はちじ</td>
+</tr>
+<tr>
+<td>9</td>
+<td>きゅう／く</td>
+<td>ここのか</td>
+<td>ここのつ</td>
+<td></td>
+<td>きゅうふん</td>
+<td>くじ</td>
+</tr>
+<tr>
+<td>10</td>
+<td>じゅう</td>
+<td>とおか</td>
+<td>とお</td>
+<td></td>
+<td>じゅっぷん</td>
+<td>じゅうじ</td>
+</tr>
+<tr>
+<td></td>
+<td>にじゅう</td>
+<td>はつか</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>100</td>
+<td>ひゃく</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>1000</td>
+<td>せん</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>10000</td>
+<td>まん</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/05/22/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E5%90%8D%E8%AF%8D%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/22/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E5%90%8D%E8%AF%8D%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">【日语N5】名词整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-22 09:33:29 / 修改时间：19:07:57" itemprop="dateCreated datePublished" datetime="2022-05-22T09:33:29+08:00">2022-05-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="【日语N5】名词整理"><a href="#【日语N5】名词整理" class="headerlink" title="【日语N5】名词整理"></a>【日语N5】名词整理</h1><p>学了一段时间日语，前面的一些单词记不住了。于是打算按用途整理一下名词。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/05/15/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E5%8A%A8%E8%AF%8D%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/15/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E5%8A%A8%E8%AF%8D%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">【日语学习】N5动词整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-15 09:33:29" itemprop="dateCreated datePublished" datetime="2022-05-15T09:33:29+08:00">2022-05-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-22 19:04:32" itemprop="dateModified" datetime="2022-05-22T19:04:32+08:00">2022-05-22</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="【日语学习】N5动词整理"><a href="#【日语学习】N5动词整理" class="headerlink" title="【日语学习】N5动词整理"></a>【日语学习】N5动词整理</h1><p>最近学て型，有点变不过来，从这个网站（<a target="_blank" rel="noopener" href="https://skdesu.com/zh/n5%e5%8a%a8%e8%af%8d%e5%88%97%e8%a1%a8/%EF%BC%89%E4%B8%8A%E6%89%BE%E4%BA%86%E5%8A%A8%E8%AF%8D%E8%A1%A8%EF%BC%8C%E8%87%AA%E5%B7%B1%E5%81%9A%E4%BA%86%E4%B8%80%E9%81%8D%E5%8F%98%E5%BD%A2%E3%80%82%E6%95%B4%E7%90%86%E5%A6%82%E4%B8%8B%E3%80%82%E5%90%8E%E7%BB%AD%E6%9C%89%E6%97%B6%E9%97%B4%E5%86%8D%E8%A1%A5%E5%85%85%E4%BE%8B%E5%8F%A5%EF%BC%8C%E5%8A%A0%E6%B7%B1%E5%AF%B9%E8%BF%99%E4%BA%9B%E5%8A%A8%E8%AF%8D%E7%9A%84%E7%90%86%E8%A7%A3%E3%80%82%E7%8E%B0%E9%98%B6%E6%AE%B5%E5%8F%AA%E6%98%AF%E5%85%88%E7%BB%83%E4%B9%A0%E5%A6%82%E4%BD%95%E5%8F%98%E5%BD%A2%E3%80%82">https://skdesu.com/zh/n5%e5%8a%a8%e8%af%8d%e5%88%97%e8%a1%a8/）上找了动词表，自己做了一遍变形。整理如下。后续有时间再补充例句，加深对这些动词的理解。现阶段只是先练习如何变形。</a></p>
+<table>
+<thead>
+<tr>
+<th>动词</th>
+<th>片假名</th>
+<th>中文</th>
+<th>ます</th>
+<th>て</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>会う</td>
+<td>あう</td>
+<td>遇见，会面</td>
+<td>あいます</td>
+<td>あって</td>
+</tr>
+<tr>
+<td>開く</td>
+<td>あく</td>
+<td>开放（商店、鲜花）</td>
+<td>開きます</td>
+<td>開いて</td>
+</tr>
+<tr>
+<td>開ける</td>
+<td>あける</td>
+<td>打开</td>
+<td>開けます</td>
+<td>あけて</td>
+</tr>
+<tr>
+<td></td>
+<td>あげる</td>
+<td>给；举起</td>
+<td>あげます</td>
+<td>あげで</td>
+</tr>
+<tr>
+<td>遊ぶ</td>
+<td>あそぶ</td>
+<td>玩</td>
+<td>遊びます</td>
+<td>遊んで</td>
+</tr>
+<tr>
+<td>浴びる</td>
+<td>あびる</td>
+<td>洗个澡</td>
+<td>浴びます</td>
+<td>浴びて</td>
+</tr>
+<tr>
+<td>洗う</td>
+<td>あらう</td>
+<td>洗</td>
+<td>洗います</td>
+<td>洗って</td>
+</tr>
+<tr>
+<td>有る</td>
+<td>ある</td>
+<td>存在，存在</td>
+<td>あります</td>
+<td>有って</td>
+</tr>
+<tr>
+<td>ある</td>
+<td>ある</td>
+<td>拥有</td>
+<td>あります</td>
+<td>あって</td>
+</tr>
+<tr>
+<td>歩く</td>
+<td>あるく</td>
+<td>步行，步行（步行）</td>
+<td>歩きます</td>
+<td>あるって</td>
+</tr>
+<tr>
+<td>言う</td>
+<td>いう</td>
+<td>我的意思是说——</td>
+<td>いいます</td>
+<td>言って</td>
+</tr>
+<tr>
+<td>行く</td>
+<td>いく</td>
+<td>走</td>
+<td>いきます</td>
+<td>いって</td>
+</tr>
+<tr>
+<td>入る</td>
+<td>いる</td>
+<td>进入</td>
+<td>いります</td>
+<td>いって</td>
+</tr>
+<tr>
+<td>要る</td>
+<td>いる</td>
+<td>需要</td>
+<td>要ります</td>
+<td>いって</td>
+</tr>
+<tr>
+<td>居る</td>
+<td>いる</td>
+<td>存在</td>
+<td>居ます</td>
+<td>居て</td>
+</tr>
+<tr>
+<td>入れる</td>
+<td>いれる</td>
+<td>插入，放置，输入</td>
+<td>入れます</td>
+<td>いれて</td>
+</tr>
+<tr>
+<td>歌う</td>
+<td>うたう</td>
+<td>唱</td>
+<td>歌ます</td>
+<td>歌って</td>
+</tr>
+<tr>
+<td>生まれる</td>
+<td>うまれる</td>
+<td>出生，产生</td>
+<td>生まれます</td>
+<td>生まれて</td>
+</tr>
+<tr>
+<td>売る</td>
+<td>うる</td>
+<td>卖</td>
+<td>売ります</td>
+<td>売って</td>
+</tr>
+<tr>
+<td>起きる</td>
+<td>おきる</td>
+<td>醒来</td>
+<td>起きます</td>
+<td>おきまして</td>
+</tr>
+<tr>
+<td>置く</td>
+<td>おく</td>
+<td>放。搁。置</td>
+<td>おきます</td>
+<td>置いて</td>
+</tr>
+<tr>
+<td>送る</td>
+<td>おくる</td>
+<td>提交</td>
+<td>送ります。</td>
+<td>送って</td>
+</tr>
+<tr>
+<td>押す</td>
+<td>おす</td>
+<td>推</td>
+<td>押します</td>
+<td>押して</td>
+</tr>
+<tr>
+<td>覚える</td>
+<td>おぼえる</td>
+<td>记住，记住</td>
+<td>覚えます</td>
+<td>覚えて</td>
+</tr>
+<tr>
+<td>泳ぐ</td>
+<td>およぐ</td>
+<td>游泳</td>
+<td>泳ぎます</td>
+<td>泳ぎまして</td>
+</tr>
+<tr>
+<td>降りる</td>
+<td>おりる</td>
+<td>下来（从汽车、楼梯）</td>
+<td>降ります</td>
+<td>降りて</td>
+</tr>
+<tr>
+<td>終わる</td>
+<td>おわる</td>
+<td>完成，完成</td>
+<td>終わります</td>
+<td>終わって</td>
+</tr>
+<tr>
+<td>買う</td>
+<td>かう</td>
+<td>采购</td>
+<td>買います</td>
+<td>買って</td>
+</tr>
+<tr>
+<td>返す</td>
+<td>かえす</td>
+<td>返回（对象）</td>
+<td>返します</td>
+<td>返して</td>
+</tr>
+<tr>
+<td>帰る</td>
+<td>かえる</td>
+<td>返回，返回，离开（家）</td>
+<td>帰ります</td>
+<td>帰って</td>
+</tr>
+<tr>
+<td>掛かる</td>
+<td>かかる</td>
+<td>垂挂</td>
+<td>掛かります</td>
+<td>掛かって</td>
+</tr>
+<tr>
+<td>書く</td>
+<td>かく</td>
+<td>写</td>
+<td>書きます</td>
+<td>書いて</td>
+</tr>
+<tr>
+<td>掛ける</td>
+<td>かける</td>
+<td>垂挂</td>
+<td>掛けます</td>
+<td>掛けて</td>
+</tr>
+<tr>
+<td>掛ける</td>
+<td>かける</td>
+<td>打个电话</td>
+<td>かけます</td>
+<td>かけて</td>
+</tr>
+<tr>
+<td>貸す</td>
+<td>かす</td>
+<td>借</td>
+<td>貸します</td>
+<td>貸して</td>
+</tr>
+<tr>
+<td>冠る</td>
+<td>かぶる</td>
+<td>戴在头上（帽子，帽子）</td>
+<td>かぶります</td>
+<td>かぶって</td>
+</tr>
+<tr>
+<td>借りる</td>
+<td>かりる</td>
+<td>借</td>
+<td>借ります</td>
+<td>借りて</td>
+</tr>
+<tr>
+<td>消える</td>
+<td>きえる</td>
+<td>消失，消失，</td>
+<td>消えます</td>
+<td>消えて</td>
+</tr>
+<tr>
+<td>聞く</td>
+<td>きく</td>
+<td>听</td>
+<td>聞きます</td>
+<td>聞いて</td>
+</tr>
+<tr>
+<td>切る</td>
+<td>きる</td>
+<td>切</td>
+<td>切ります</td>
+<td>切って</td>
+</tr>
+<tr>
+<td>着る</td>
+<td>きる</td>
+<td>穿上，穿上</td>
+<td>着ます</td>
+<td>着て</td>
+</tr>
+<tr>
+<td>来る</td>
+<td>くる</td>
+<td>过来</td>
+<td>きます</td>
+<td>来て</td>
+</tr>
+<tr>
+<td>消す</td>
+<td>けす</td>
+<td>擦除，关闭，熄灭</td>
+<td>消します</td>
+<td>消して</td>
+</tr>
+<tr>
+<td>答える</td>
+<td>こたえる</td>
+<td>回复</td>
+<td>答えります</td>
+<td>答えて</td>
+</tr>
+<tr>
+<td>困る</td>
+<td>こまる</td>
+<td>困难，问题</td>
+<td>困ります</td>
+<td>困って</td>
+</tr>
+<tr>
+<td>咲く</td>
+<td>さく</td>
+<td>(花)开</td>
+<td>咲きます</td>
+<td>咲いて</td>
+</tr>
+<tr>
+<td>死ぬ</td>
+<td>しぬ</td>
+<td>死</td>
+<td>死にます</td>
+<td>死にまして</td>
+</tr>
+<tr>
+<td>閉まる</td>
+<td>しまる</td>
+<td>关闭（不及物，godan )</td>
+<td>閉まります</td>
+<td>閉まって</td>
+</tr>
+<tr>
+<td>閉める</td>
+<td>しめる</td>
+<td>关闭（传递，ichidan）</td>
+<td>閉めます</td>
+<td>閉めて</td>
+</tr>
+<tr>
+<td>締める</td>
+<td>しめる</td>
+<td>勒紧，系紧；束紧；绷紧</td>
+<td>しめます</td>
+<td>締めて</td>
+</tr>
+<tr>
+<td>知る</td>
+<td>しる</td>
+<td>知道，知道</td>
+<td>知ります</td>
+<td>知って</td>
+</tr>
+<tr>
+<td>吸う</td>
+<td>すう</td>
+<td>呼吸，抽烟</td>
+<td>吸います</td>
+<td>吸って</td>
+</tr>
+<tr>
+<td>住む</td>
+<td>すむ</td>
+<td>生活，居住在某个地方</td>
+<td>すみます</td>
+<td>住んで</td>
+</tr>
+<tr>
+<td>する</td>
+<td>する</td>
+<td>做</td>
+<td>します</td>
+<td>して</td>
+</tr>
+<tr>
+<td>座る</td>
+<td>すわる</td>
+<td>坐</td>
+<td>座ります</td>
+<td>座って</td>
+</tr>
+<tr>
+<td>出す</td>
+<td>だす</td>
+<td>接受，给予，放置，展示，发送，展示</td>
+<td>出します</td>
+<td>出して</td>
+</tr>
+<tr>
+<td>立つ</td>
+<td>たつ</td>
+<td>起床站起来</td>
+<td>立ちます</td>
+<td>立って</td>
+</tr>
+<tr>
+<td>頼む</td>
+<td>たのむ</td>
+<td>问，要求，问</td>
+<td>頼みます</td>
+<td>頼んで</td>
+</tr>
+<tr>
+<td>食べる</td>
+<td>たべる</td>
+<td>吃</td>
+<td>食べます</td>
+<td>食べて</td>
+</tr>
+<tr>
+<td>違う</td>
+<td>ちがう</td>
+<td>不同，错了，不是吗</td>
+<td>違います</td>
+<td>違って</td>
+</tr>
+<tr>
+<td>使う</td>
+<td>つかう</td>
+<td>使用（例如电脑、电话……）</td>
+<td>使います</td>
+<td>使って</td>
+</tr>
+<tr>
+<td>疲れる</td>
+<td>つかれる</td>
+<td>筋疲力尽</td>
+<td>疲れります</td>
+<td>疲れって</td>
+</tr>
+<tr>
+<td>着く</td>
+<td>つく</td>
+<td>到达</td>
+<td>着きます</td>
+<td>ついて</td>
+</tr>
+<tr>
+<td>作る</td>
+<td>つくる</td>
+<td>制造，生产</td>
+<td>作ります</td>
+<td>作って</td>
+</tr>
+<tr>
+<td>点ける</td>
+<td>つける</td>
+<td>打开灯，打开，打开</td>
+<td>つけます</td>
+<td>つけて</td>
+</tr>
+<tr>
+<td>勤める</td>
+<td>つとめる</td>
+<td>工作，为（某人）服务</td>
+<td>勤めります</td>
+<td>勤めって</td>
+</tr>
+<tr>
+<td>出かける</td>
+<td>でかける</td>
+<td>出去</td>
+<td>出かけます</td>
+<td>出かけて</td>
+</tr>
+<tr>
+<td>出来る</td>
+<td>できる</td>
+<td>做，能够做某事</td>
+<td>出来ます</td>
+<td>出来て</td>
+</tr>
+<tr>
+<td>出る</td>
+<td>でる</td>
+<td>离开</td>
+<td>出ます</td>
+<td>出まして</td>
+</tr>
+<tr>
+<td>飛ぶ</td>
+<td>とぶ</td>
+<td>飞</td>
+<td>飛びます</td>
+<td>飛んで</td>
+</tr>
+<tr>
+<td>止まる</td>
+<td>とまる</td>
+<td>停</td>
+<td>止まります</td>
+<td>止まって</td>
+</tr>
+<tr>
+<td>取る</td>
+<td>とる</td>
+<td>拿，拿</td>
+<td>取ります</td>
+<td>取って</td>
+</tr>
+<tr>
+<td>撮る</td>
+<td>とる</td>
+<td>拍照</td>
+<td>撮ります</td>
+<td>撮って</td>
+</tr>
+<tr>
+<td>鳴く</td>
+<td>なく</td>
+<td>唱歌、尖叫、喵喵叫（猫）</td>
+<td>なきます</td>
+<td>鳴いて</td>
+</tr>
+<tr>
+<td>並ぶ</td>
+<td>ならぶ</td>
+<td>形成一条线</td>
+<td>並びます</td>
+<td>並んで</td>
+</tr>
+<tr>
+<td>並べる</td>
+<td>ならべる</td>
+<td>排队</td>
+<td>並べます</td>
+<td>並べて</td>
+</tr>
+<tr>
+<td></td>
+<td>なる</td>
+<td>成为</td>
+<td>なります</td>
+<td>なって</td>
+</tr>
+<tr>
+<td>脱ぐ</td>
+<td>ぬぐ</td>
+<td>脱衣服，脱衣服</td>
+<td>脱ぎます</td>
+<td>ぬいで</td>
+</tr>
+<tr>
+<td>寝る</td>
+<td>ねる</td>
+<td>睡觉睡觉</td>
+<td>寝ます</td>
+<td>寝て</td>
+</tr>
+<tr>
+<td>登る</td>
+<td>のぼる</td>
+<td>爬，爬</td>
+<td>登ります</td>
+<td>登って</td>
+</tr>
+<tr>
+<td>飲む</td>
+<td>のむ</td>
+<td>喝</td>
+<td>飲みます</td>
+<td>飲んで</td>
+</tr>
+<tr>
+<td>乗る</td>
+<td>のる</td>
+<td>骑（自行车，动物）</td>
+<td>乗ります</td>
+<td>乗って</td>
+</tr>
+<tr>
+<td>入る</td>
+<td>はいる</td>
+<td>登录</td>
+<td>入ります</td>
+<td>入って</td>
+</tr>
+<tr>
+<td>履く</td>
+<td>はく</td>
+<td>穿上（穿上）</td>
+<td>はきます</td>
+<td>履いて</td>
+</tr>
+<tr>
+<td>始まる</td>
+<td>はじまる</td>
+<td>开始，开始，开始</td>
+<td>始まります</td>
+<td>始まって</td>
+</tr>
+<tr>
+<td>走る</td>
+<td>はしる</td>
+<td>跑</td>
+<td>走ります</td>
+<td>走って</td>
+</tr>
+<tr>
+<td>働く</td>
+<td>はたらく</td>
+<td>上班</td>
+<td>働きます</td>
+<td>働いて</td>
+</tr>
+<tr>
+<td>話す</td>
+<td>はなす</td>
+<td>说说话说</td>
+<td>話します</td>
+<td>話して</td>
+</tr>
+<tr>
+<td>張る</td>
+<td>はる</td>
+<td>拉伸，拉紧，拉紧</td>
+<td>はります</td>
+<td>張って</td>
+</tr>
+<tr>
+<td>晴れる</td>
+<td>はれる</td>
+<td>干净清澈、放晴</td>
+<td>晴れます</td>
+<td>晴れて</td>
+</tr>
+<tr>
+<td>引く</td>
+<td>ひく</td>
+<td>拉, 拉 (eng: 拉)</td>
+<td>引きます</td>
+<td>引いて</td>
+</tr>
+<tr>
+<td>弾く</td>
+<td>ひく</td>
+<td>演奏乐器</td>
+<td>弾きます</td>
+<td>弾いて</td>
+</tr>
+<tr>
+<td>吹く</td>
+<td>ふく</td>
+<td>吹</td>
+<td>吹きます</td>
+<td>吹いて</td>
+</tr>
+<tr>
+<td>降る</td>
+<td>ふる</td>
+<td>落下（雨、雪）</td>
+<td>降ります</td>
+<td>降って</td>
+</tr>
+<tr>
+<td>曲がる</td>
+<td>まがる</td>
+<td>转弯，弯曲，扭曲</td>
+<td>曲がります</td>
+<td>曲がって</td>
+</tr>
+<tr>
+<td>待つ</td>
+<td>まつ</td>
+<td>等待</td>
+<td>待ちます</td>
+<td>待って</td>
+</tr>
+<tr>
+<td>磨く</td>
+<td>みがく</td>
+<td>刷，抛光</td>
+<td>磨きます</td>
+<td>磨いて</td>
+</tr>
+<tr>
+<td>見せる</td>
+<td>みせる</td>
+<td>显示</td>
+<td>見せます</td>
+<td>見せて</td>
+</tr>
+<tr>
+<td>見る</td>
+<td>みる</td>
+<td>看，看，看</td>
+<td>見ます</td>
+<td>見まして</td>
+</tr>
+<tr>
+<td>持つ</td>
+<td>もつ</td>
+<td>拥有</td>
+<td>持ちます</td>
+<td>持って</td>
+</tr>
+<tr>
+<td>休む</td>
+<td>やすむ</td>
+<td>休息</td>
+<td>休みます</td>
+<td>休んで</td>
+</tr>
+<tr>
+<td></td>
+<td>やる</td>
+<td>做</td>
+<td>やります</td>
+<td>やって</td>
+</tr>
+<tr>
+<td>呼ぶ</td>
+<td>よぶ</td>
+<td>打电话</td>
+<td>呼びます</td>
+<td>呼んで</td>
+</tr>
+<tr>
+<td>読む</td>
+<td>よむ</td>
+<td>读</td>
+<td>読みます</td>
+<td>読んで</td>
+</tr>
+<tr>
+<td>分かる</td>
+<td>わかる</td>
+<td>明白，知道</td>
+<td>わかります</td>
+<td>分かって</td>
+</tr>
+<tr>
+<td>忘れる</td>
+<td>わすれる</td>
+<td>忘记</td>
+<td>忘れます</td>
+<td>忘れて</td>
+</tr>
+<tr>
+<td>渡す</td>
+<td>わたす</td>
+<td>交付（礼物……）</td>
+<td>渡します</td>
+<td>渡して</td>
+</tr>
+<tr>
+<td>渡る</td>
+<td>わたる</td>
+<td>交叉，继续前进</td>
+<td>わたります</td>
+<td>渡って</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/04/17/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E8%AF%AD%E6%B3%95%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/17/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E8%AF%AD%E6%B3%95%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">【日语N5】语法整理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-17 09:33:29" itemprop="dateCreated datePublished" datetime="2022-04-17T09:33:29+08:00">2022-04-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-22 19:07:20" itemprop="dateModified" datetime="2022-05-22T19:07:20+08:00">2022-05-22</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>学日语有两个多月了，回顾下这两个月的比较重要的语法（或者说我比较容易忘的），记录于此。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/17/%E3%80%90%E6%97%A5%E8%AF%ADN5%E3%80%91%E8%AF%AD%E6%B3%95%E6%95%B4%E7%90%86/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/02/16/Sequence%20Directed%20Hybrid%20Fuzzing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/16/Sequence%20Directed%20Hybrid%20Fuzzing/" class="post-title-link" itemprop="url">【论文笔记】Sequence Coverage Directed Greybox Fuzzing</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-02-17 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-17T00:00:00+08:00">2022-02-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 16:00:49" itemprop="dateModified" datetime="2023-08-14T16:00:49+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Sequence-Directed-Hybrid-Fuzzing"><a href="#Sequence-Directed-Hybrid-Fuzzing" class="headerlink" title="Sequence Directed Hybrid Fuzzing"></a>Sequence Directed Hybrid Fuzzing</h1><p>这篇文章发表于CCF B类会议SANER 2020，是ICPC 19年一篇工作的改进版Sequence coverage directed greybox fuzzing</p>
+<p>主要的变化是原来是单纯的fuzz，现在是hybird Fuzz，也就是加入了符号执行来作为辅助。</p>
+<p>这篇工作要解决的问题是：现有的定向模糊测试没有在effectness和efficiency上达到很好的平衡，也很难基于随机变异来覆盖复杂的路径。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>文章主要是在能量调度算法和种子选择策略做了修改。能量调度算法是根据目标序列和种子执行轨迹的相似度进行比较。种子选择策略在lolly基础上，又多考虑了到达目标的路径上的必要点。变异输入部分再结合concolic execution来高效生成覆盖复杂条件的输入。</p>
+<p>文章的总体框架如下所示，分为静态分析和动态分析两个部分。</p>
+<p>静态分析首先把目标序列和源码的行号转化为基本块，并且基于dominant tree analysis求出ETS。其中ETS表示的是enhanced target sequence，意思是目标序列和到达目标序列的必要节点的结合。然后插桩主要是为了在运行时获得分支覆盖率和目标执行轨迹的信息。</p>
+<p>动态分析部分，fuzzer的输入是插桩后的二进制和ETS，然后fuzz的过程时，把种子放在三种级别的队列中，分别是L1，L2，L3，表示高优先级，普通优先级，低优先级。Concolic Executor的输入是测试的二进制（PUT）和L1级别的种子，并且把新生成的种子放在L2级别。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220216172449097.png" alt="image-20220216172449097"></p>
+<h3 id="Static-Analysis"><a href="#Static-Analysis" class="headerlink" title="Static Analysis"></a>Static Analysis</h3><p>为了支持细粒度的调度种子，文章考虑了目标序列的覆盖率以及他们的执行上下文（也就是到达目标序列的必要节点）。执行上下文获取的算法如下图所示：</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217105107067.png" alt="image-20220217105107067"></p>
+<p>在控制流图中，如果到达节点n的每条路径都需要经过节点d，那么就叫节点d为节点n的支配节点。如果树上的每个节点只支配自身及其子节点，就叫这个树为支配树。</p>
+<p>上面的算法里，n0是entry node，N是所有基本块的集合。对于一个基本块n，他的支配节点是节点n所有前驱节点的支配节点的交集。所以，一开始的时候，对于任意一个节点n，先将他的支配节点的集合设为N。然后再迭代式地移除不属于节点n的支配节点（5-9行）。最后13行-15行是去获取属于目标序列（Target Sequence）的必要节点。</p>
+<p>接下来是插桩部分，除了插桩获取覆盖率信息外，SDHF也对ETS的基本块进行插桩，来获取目标执行轨迹TET。覆盖率信息和TET和ETS的相似度将被用于确定种子的优先级。</p>
+<p>比如下面的例子，种子的执行轨迹是“aegabdfg”，由静态分析得到的ETS是abcg，通过插桩得到的TET是ababg。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217110654254.png" alt="image-20220217110654254"></p>
+<h3 id="dynamic-analysis"><a href="#dynamic-analysis" class="headerlink" title="dynamic analysis"></a>dynamic analysis</h3><p>动态分析部分主要是fuzzer和concolic executor的交互。</p>
+<p><strong>1）fuzzing process</strong></p>
+<p>fuzz的总的流程如下所示。首先从种子队列S中取出一个种子s，并且给种子赋予能量p。种子的能量决定了变异这个种子的时间。然后，fuzzer对种子进行变异，并且生成新的种子s‘，如果s’产生了crash，就会把这个种子放在Sx集合中。对于每个新生成的种子s‘，都会去计算种子执行轨迹与ETS的相似度sim以及是否有增加覆盖率cov。如果相似度大于某个阈值d并且有新增覆盖率，则把种子加入L1优先级队列，如果相似度大于d，但没有新增覆盖率，则要放到L2中。如果种子相似度没有大于阈值也没有新增覆盖率，就放到L3。持续这个过程直到超时或者手动中止。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217114303629.png" alt="image-20220217114303629"></p>
+<p><strong>2）concolic execution</strong></p>
+<p>concolic execution是fuzzing过程的一个辅助手段，它以部分匹配的种子作为输入，来生成更高相似度的种子。因为fuzzer是依靠随机变异来生成种子，即使fuzzer生成了高相似度的种子，也不能确定新生成的种子接近了目标序列。concolic execution能够获取种子执行的路径并且生成执行特定路径的输入。</p>
+<p>这部分的算法如下图所示。首先执行给定的种子S，获得种子S执行的路径Trace。然后遍历路径Trace上的基本块，根据最大匹配前置路径，找到转换点SP的基本块，获取转换点基本块另一个没执行过的子节点的约束，生成新的种子。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217185724959.png" alt="image-20220217185724959"></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><p>在LAVA-M上与QSYM比较发现漏洞效率，TTE表示发现漏洞的时间。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217191920235.png" alt="image-20220217191920235"></p>
+<p>和BugRedux，AFLGo比较复现漏洞的有效性。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217192202079.png" alt="image-20220217192202079"></p>
+<p>与Lolly比<em>True Positives Verifification</em>的能力</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217192408062.png" alt="image-20220217192408062"></p>
+<p>最后再用工具挖到了几个真实的漏洞：</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20220217192519751.png" alt="image-20220217192519751"></p>
 
       
     </div>
@@ -221,6 +2242,9 @@
 
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
 
 
 
@@ -277,6 +2301,8 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="iskindar"
+      src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
   <p class="site-author-name" itemprop="name">iskindar</p>
   <div class="site-description" itemprop="description"></div>
 </div>
@@ -285,12 +2311,24 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
   </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iskindar" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iskindar" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:iskindar97@gmail.com" title="E-Mail → mailto:iskindar97@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
 
 
 
@@ -319,7 +2357,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">iskindar</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div>
 
         
@@ -345,33 +2383,39 @@
 <script src="/js/motion.js"></script>
 
 
-<script src="/js/schemes/muse.js"></script>
+<script src="/js/schemes/pisces.js"></script>
 
 
 <script src="/js/next-boot.js"></script>
 
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
+<script src="/js/bookmark.js"></script>
 
 
 
 
   
 
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
   
 
-<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/model/katou_01/katou_01.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
 </html>

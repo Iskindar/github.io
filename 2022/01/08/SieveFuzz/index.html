@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iskindar.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing via Target-tailored Program State Restriction论文基本信息发表会议或期刊（简称，CCF级别）：ACSAC 2022论文标题（论文简称）：One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing vi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】SieveFuzz">
+<meta property="og:url" content="http://iskindar.github.io/2022/01/08/SieveFuzz/index.html">
+<meta property="og:site_name" content="iskindar的博客">
+<meta property="og:description" content="One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing via Target-tailored Program State Restriction论文基本信息发表会议或期刊（简称，CCF级别）：ACSAC 2022论文标题（论文简称）：One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing vi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230108173457057.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230108185845593.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230108195707674.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230109195140486.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230109195933269.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230109200808145.png">
+<meta property="article:published_time" content="2022-01-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-14T08:01:21.748Z">
+<meta property="article:author" content="iskindar">
+<meta property="article:tag" content="paper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230108173457057.png">
+
+<link rel="canonical" href="http://iskindar.github.io/2022/01/08/SieveFuzz/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【论文笔记】SieveFuzz | iskindar的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9a79db5615c4a0bf77e512dd81c44895";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">iskindar的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Into the Night !</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/iskindar" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/01/08/SieveFuzz/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【论文笔记】SieveFuzz
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-09 00:00:00" itemprop="dateCreated datePublished" datetime="2022-01-09T00:00:00+08:00">2022-01-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 16:01:21" itemprop="dateModified" datetime="2023-08-14T16:01:21+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="One-Fuzz-Doesn’t-Fit-All-Optimizing-Directed-Fuzzing-via-Target-tailored-Program-State-Restriction"><a href="#One-Fuzz-Doesn’t-Fit-All-Optimizing-Directed-Fuzzing-via-Target-tailored-Program-State-Restriction" class="headerlink" title="One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing via Target-tailored Program State Restriction"></a>One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing via Target-tailored Program State Restriction</h1><h2 id="论文基本信息"><a href="#论文基本信息" class="headerlink" title="论文基本信息"></a>论文基本信息</h2><p>发表会议或期刊（简称，CCF级别）：ACSAC 2022<br>论文标题（论文简称）：One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing via Target-tailored Program State Restriction<br>论文作者所在团队：Hexhive<br>论文一句话概述：论文提出XX方法，解决了XX问题。<br>论文实验情况：实验工具（是否开源），实验测试集（是否开源），实验环境，实验规模，简要过程</p>
+<p>开源于：<a target="_blank" rel="noopener" href="https://github.com/HexHive/SieveFuzz">https://github.com/HexHive/SieveFuzz</a></p>
+<h2 id="论文概述"><a href="#论文概述" class="headerlink" title="论文概述"></a>论文概述</h2><p>众所周知，fuzzing是发现软件漏洞的一种实用技术。然而，有时候，我们只需要关注特定的代码区域有没有漏洞，比如漏洞复现，补丁或者回归测试。这种需求催生了定向模糊测试。给定一些目标位置（行号），定向模糊测试通过距离最小化策略来让fuzzing往这些地方探索。距离最小化策略是找到离目标近的测试样例，然后随机地变异这些测试样例。然而，这个策略被应用到所有的测试样例，不管样例是否到达了目标，这就会导致浪费很多时间计算没有到达目标的测试样例的距离。要加速定向模糊测试就需要对目标可达的路径进行优先级排序。</p>
+<p>因此，本文提出了tripwiring（绊绳，一种陷阱，可以让路过的东西摔倒），一种轻量级的技术过滤不会到达目标的路径。通过限制模糊测试探索只会到达目标的路径，可以减小模糊测试的噪声，从而减小了插桩和距离最小化策略的开销，能够提升定向模糊测试器高达99x的测试样例的吞吐量。</p>
+<p>实验评估方面，与AFLGo，Beacon和AFL++进行了对比，在9个benchmark上触发的漏洞要比这些工具多47%，也快117%。</p>
+<h2 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h2><p>现有的定向模糊测试使用距离最小化策略来让fuzzing探索预定义的目标位置。为了实现定向性，距离最小化策略计算每个生成的测试样例到目标位置的距离。然而距离测量是在运行时，并且是对所有种子实施的。而大多数的种子并不会到达目标，就会引入过多的开销。</p>
+<p>而且，距离最小化策略并不适合那些很容易到达的目标。对于这些容易到达的目标，距离最小化的开销很大。没必要对无法到达目标的路径进行分析。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><p>文章主要介绍了两类工作，一个是定向模糊测试，另一个是提高fuzzing性能的。</p>
+<p>定向模糊测试这块提到了AFLGO，Hawkeye，ParmeSan，UAFuzz，UAFL，BEACON。</p>
+<p>提高fuzzing性能的提到了AFL-Dyninst，AFL-QEMU，RetroWrite，ZAFL。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230108173457057.png" alt="image-20230108173457057"></p>
+<p>宏观层次上，用传统的控制流和路径检测方法识别出到达目标位置的路径，然后修改覆盖率导向的模糊测试让其只探索这些区域，从而实现定向性。</p>
+<p>文章的核心思想是认为定向模糊测试浪费过多的时间在目标不可到达的路径上，所以可以先发制人地终止模糊测试探索目标不可达的区域。这么做有两点好处：</p>
+<ul>
+<li>fuzzer里超过90%的运行时间就不会花在计算代码覆盖率和目标距离上。</li>
+<li>过滤掉这些路径，fuzzer就不会浪费资源在处理这些测试样例上。</li>
+</ul>
+<h3 id="识别不可达区域"><a href="#识别不可达区域" class="headerlink" title="识别不可达区域"></a>识别不可达区域</h3><p>识别不可达区域的算法如下，首先用目标位置的入口结点来初始化worklist，同时allow list也初始化为空集。然后，对于worklist中的每个元素，做如下操作：</p>
+<ul>
+<li>在过程间控制流图上，找到每个节点的来边</li>
+<li>对于每条边，检查它的源和对应于过程间控制流图上的节点</li>
+<li>使用调用图检查从源能否到目标，如果可以，就把源加在allow list里，对应节点加在worklist里。</li>
+</ul>
+<p>所有在allow list外的节点就会被判定为不必要的。由于过程间控制流图对上下文不敏感，我们的分析可能会多包含一些目标相关的代码区域。为了缓解这个问题，整合了函数可达性分析的结果。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230108185845593.png" alt="image-20230108185845593"></p>
+<p>同时，由于使用静态分析来生成ICFG和CG，另一个挑战是处理间接跳转。求解间接跳转的静态方法有指向分析和值集分析，但是这种静态的方法会over-approximate候选的目标。从而不能保证fuzzing的定向性。</p>
+<p>为了缓解这个问题，文章用每个新覆盖的间接分支来更新调用图。有了新信息后，再重新用上面的分析方法来更新可达的区域。虽然这种重分析技术会增加运行时开销，但是带来的好处是覆盖率的指数下降，所以不会有很明显的性能下降。</p>
+<p>虽然是动态解决间接调用问题的，目标位置在一开始的可达性分析里可能会被忽略。然而，作者观察到用其他模糊测试器生成种子的trace来进行分析就够了。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>基于AFL++实现。为了实现按需的可达性分析，实现了fuzzer和分析模块的client-server的通信机制。静态分析基于SVF框架。</p>
+<p>总体框架可以用一个状态机来表示。</p>
+<p>INIT：一开始，确定target是否在初始的ICFG和CG上可达。如果是不可达，有可能静态没有识别到一些间接跳转的。因此转到EXP状态去探索。利用EXP过程跑的动态信息来更新ICFG和CG。不过要尽可能避免EXP过程，所以一开始会利用初始种子来更新这些间接跳转。</p>
+<p>EXP：如果目标是不可达的，就使用非定向，non-tripwired的模糊测试来多样化可选的种子。一旦发现有一条路径可以到达目标，就退出这个阶段，跳到FUZZ阶段。</p>
+<p>FUZZ：一旦确定target是可达的，tripwired-directed fuzzing就开始了。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230108195707674.png" alt="image-20230108195707674"></p>
+<p>为了随时更新间接跳转，作者实现了按需的可达性分析。也就是引入了通信机制，一旦发现新的间接边，就暂停fuzzer，等待静态分析模块反馈结果。不过这个切换实际运行时并不多。</p>
+<p>提前终止部分的实现是：分配给每个代码区域一个唯一的数字ID，然后用ID去hook每个区域调用运行库的开始。然后把这个库链接到被插桩的程序，利用它来强制终止执行。</p>
+<p>同时也会维护一个动态的bitmap，每个bit和每个ID映射。如果bit是unset，和这个bit相对应的函数就不会被执行。间接跳转追踪的部分，对所有间接跳转分支进行插桩，去获取这些边的目的地。</p>
+<h2 id="实验结果及分析"><a href="#实验结果及分析" class="headerlink" title="实验结果及分析"></a>实验结果及分析</h2><p>主要回答这三个问题：</p>
+<ul>
+<li>RQ1：Is tripwiring effective and fast at restricting fuzzing-reachable search space?,</li>
+<li>RQ2：Do the benefits of tripwiring improve directed fuzzing effectiveness and speed?</li>
+<li>RQ3：Are there properties that make a target location well suited to tripwiring?</li>
+</ul>
+<p>对于RQ1，平均消除了29%的空间。这让我有点意外，比我想象中的少很多。表格中也给出了初始分析的时间和重分析的时间，开销是比较小的。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230109195140486.png" alt="image-20230109195140486"></p>
+<p>对于RQ2，触发漏洞的时间比AFLGO快3.49x，比AFL++快8.36x，比Beacon快2.82x</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230109195933269.png" alt="image-20230109195933269"></p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20230109200808145.png" alt="image-20230109200808145"></p>
+<p>对于RQ3，作者得出两个结论：</p>
+<ul>
+<li>可以用“不能到达目标位置的代码数量”来识别目标是否disjoint。也就是脱节。</li>
+<li>对于这类脱节的目标，用文章的方法要比距离最小化的方法好。</li>
+</ul>
+<h2 id="自己的感受"><a href="#自己的感受" class="headerlink" title="自己的感受"></a>自己的感受</h2><p>这篇文章的思路和Beacon有些相似，但是，是通过动态的方法解决的。</p>
+<p>而且实现上有几个点挺有意思的。比如，动态方法解决间接调用追踪的问题，通过链接库来让程序提前终止等等。</p>
+<p>并且发现开源的仓库给的脚本特别详细，所有的数据应该是都开源了。有机会看一看他的仓库。</p>
+<p>最后就是这篇文章写作上用词用得比较巧，有很多表达是值得收藏的。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/paper/" rel="tag"># paper</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/15/learch/" rel="prev" title="【论文笔记】Learning to Explore Paths for Symbolic Executio">
+      <i class="fa fa-chevron-left"></i> 【论文笔记】Learning to Explore Paths for Symbolic Executio
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/01/21/Regression%20Greybox%20Fuzzing/" rel="next" title="【论文笔记】Regression Greybox Fuzzing">
+      【论文笔记】Regression Greybox Fuzzing <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#One-Fuzz-Doesn%E2%80%99t-Fit-All-Optimizing-Directed-Fuzzing-via-Target-tailored-Program-State-Restriction"><span class="nav-number">1.</span> <span class="nav-text">One Fuzz Doesn’t Fit All: Optimizing Directed Fuzzing via Target-tailored Program State Restriction</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">论文基本信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E6%A6%82%E8%BF%B0"><span class="nav-number">1.2.</span> <span class="nav-text">论文概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">研究背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.4.</span> <span class="nav-text">相关工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.5.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E4%B8%8D%E5%8F%AF%E8%BE%BE%E5%8C%BA%E5%9F%9F"><span class="nav-number">1.5.1.</span> <span class="nav-text">识别不可达区域</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.6.</span> <span class="nav-text">实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E5%8F%8A%E5%88%86%E6%9E%90"><span class="nav-number">1.7.</span> <span class="nav-text">实验结果及分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%B7%B1%E7%9A%84%E6%84%9F%E5%8F%97"><span class="nav-number">1.8.</span> <span class="nav-text">自己的感受</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="iskindar"
+      src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+  <p class="site-author-name" itemprop="name">iskindar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iskindar" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iskindar" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:iskindar97@gmail.com" title="E-Mail → mailto:iskindar97@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iskindar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/model/katou_01/katou_01.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

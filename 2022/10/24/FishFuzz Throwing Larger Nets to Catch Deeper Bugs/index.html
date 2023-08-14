@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iskindar.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="FishFuzz: Throwing Larger Nets to Catch Deeper Bugs开源于：https:&#x2F;&#x2F;zenodo.org&#x2F;record&#x2F;6405418 论文基本信息发表年份：2022发表会议或期刊（简称，CCF级别）：预印版论文标题（论文简称）：FishFuzz: Throwing Larger Nets to Catch Deeper Bugs论文作者所在团队：网络中心">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】FishFuzz:Throwing Larger Nets to Catch Deeper Bugs">
+<meta property="og:url" content="http://iskindar.github.io/2022/10/24/FishFuzz%20Throwing%20Larger%20Nets%20to%20Catch%20Deeper%20Bugs/index.html">
+<meta property="og:site_name" content="iskindar的博客">
+<meta property="og:description" content="FishFuzz: Throwing Larger Nets to Catch Deeper Bugs开源于：https:&#x2F;&#x2F;zenodo.org&#x2F;record&#x2F;6405418 论文基本信息发表年份：2022发表会议或期刊（简称，CCF级别）：预印版论文标题（论文简称）：FishFuzz: Throwing Larger Nets to Catch Deeper Bugs论文作者所在团队：网络中心">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023182021870.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221024210010657.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105710952.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105651544.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105750760.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023163233076.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023163242967.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025113308569.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114407436.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114416052.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114530188.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114940865.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114612407.png">
+<meta property="article:published_time" content="2022-10-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-14T08:06:40.575Z">
+<meta property="article:author" content="iskindar">
+<meta property="article:tag" content="paper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023182021870.png">
+
+<link rel="canonical" href="http://iskindar.github.io/2022/10/24/FishFuzz%20Throwing%20Larger%20Nets%20to%20Catch%20Deeper%20Bugs/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【论文笔记】FishFuzz:Throwing Larger Nets to Catch Deeper Bugs | iskindar的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9a79db5615c4a0bf77e512dd81c44895";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">iskindar的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Into the Night !</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/iskindar" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/10/24/FishFuzz%20Throwing%20Larger%20Nets%20to%20Catch%20Deeper%20Bugs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【论文笔记】FishFuzz:Throwing Larger Nets to Catch Deeper Bugs
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-25 00:00:00" itemprop="dateCreated datePublished" datetime="2022-10-25T00:00:00+08:00">2022-10-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 16:06:40" itemprop="dateModified" datetime="2023-08-14T16:06:40+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="FishFuzz-Throwing-Larger-Nets-to-Catch-Deeper-Bugs"><a href="#FishFuzz-Throwing-Larger-Nets-to-Catch-Deeper-Bugs" class="headerlink" title="FishFuzz: Throwing Larger Nets to Catch Deeper Bugs"></a>FishFuzz: Throwing Larger Nets to Catch Deeper Bugs</h1><p>开源于：<a target="_blank" rel="noopener" href="https://zenodo.org/record/6405418">https://zenodo.org/record/6405418</a></p>
+<h2 id="论文基本信息"><a href="#论文基本信息" class="headerlink" title="论文基本信息"></a>论文基本信息</h2><p>发表年份：2022<br>发表会议或期刊（简称，CCF级别）：预印版<br>论文标题（论文简称）：FishFuzz: Throwing Larger Nets to Catch Deeper Bugs<br>论文作者所在团队：网络中心、兰州理工、西电、海南，EPFL<br>论文一句话概述：论文提出XX方法，解决了XX问题。<br>论文实验情况：实验工具（是否开源），实验测试集（是否开源），实验环境，实验规模，简要过程</p>
+<h2 id="论文概述"><a href="#论文概述" class="headerlink" title="论文概述"></a>论文概述</h2><p>定向模糊测试是在开发中发现漏洞的一种标准方法。模糊测试会执行许多输入来最大化测试的代码。最近，定向模糊测试提出了一种策略，不仅仅是最大化覆盖率。而是让测试导向特定区域。定向模糊测试有两个阶段，exploration（探索有趣的区域）和exploitation（触发漏洞）。目前的定向模糊测试的探索阶段都是用覆盖率来引导，exploitation阶段是通过切换不同目标来间接实现的。具体来说，文章发现了现有定向模糊测试的两个局限。（i）距离指标在对多条路径和多个目标进行计算的时候不是很准确。（2）分配能量到种子的粒度比较粗糙，没有考虑调整目标的优先级。</p>
+<p>文章提出了FishFuzz，灵感来源捕鱼。首先放一个大网，获取比较高的覆盖率，然后慢慢收网来最大化抓到的鱼。FishFuzz的核心是两个理念：（1）一种新的距离指标，准确率和目标的多少无关。（2）动态的目标排名，能够自动排除已探索过很多次的target。这个策略让FishFuzz能够无缝从单目标到多目标的切换，并且能够动态地在exploration和exploitation中切换。</p>
+<p>评估部分，将所有的sanitizer打的标签当作是target。并与三个DGF和两个CGF作笔记，结果表示，FishFuzz能够实现更高的覆盖率，并且复现现有的bug更快，最后在44个程序中发现了25个新的bug。</p>
+<h2 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h2><p>问题是什么？</p>
+<p>现有的定向模糊测试存在以下两个问题：</p>
+<ul>
+<li>种子爆炸：fuzzing的过程提供了大量的种子，放在一个池子里。导致很多好的种子没有得到足够的重视。</li>
+<li>不准确的距离度量：对大量目标计算距离会引入不准确性，也是现有定向模糊测试的种子调度算法无法处理的。</li>
+</ul>
+<p>意义是什么？</p>
+<p>可以处理大规模目标，而不会丢失准确性。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><p>相关工作主要介绍了定向模糊测试和多阶段模糊测试。</p>
+<h3 id="定向模糊测试"><a href="#定向模糊测试" class="headerlink" title="定向模糊测试"></a>定向模糊测试</h3><p>定向模糊测试是模糊测试的一个分支，专门去测试给定的区域。AFLGO将种子到目标的距离建模为调和平均距离。然而，AFLGo对于大规模的目标会丢失准确性。Hawkeye和FuzzGuard都尝试处理距离计算的间接调用问题，其中hawkey使用重量级的静态分析，Fuzzguard使用深度学习过滤不可达的输入。</p>
+<p>后面的DGF扩展性会更好一些。比如ParmeSan和SAVIOR。他们两个把target当成是所有sanitizer打上的标签。此外，SAVIOR也使用了开销比较大的可达性分析来选择有趣的输入。但他们都有AFLGo的局限性，就是把种子到目标的距离折叠为一个标量。</p>
+<p>CAFL的目标是给定一个crash，然后生成一个PoC。但CAFL只考虑一个目标。AFLChurn通过分析github仓库选择可能存在bug的位置去测试。这和本文算是一个正交的工作。Beacon使用复杂的静态分析来移除不可达的路径，从而提高了exploration的效率。这和fishfuzz提升的维度不一样。</p>
+<h3 id="多阶段模糊测试"><a href="#多阶段模糊测试" class="headerlink" title="多阶段模糊测试"></a>多阶段模糊测试</h3><p>多阶段的模糊测试使用exploration和exploitation来到达和触发多个目标。AFLFast使用马尔科夫链来概率性地选择种子来提高覆盖率。FairFuzz使用一种新的变异策略和种子选择方式来命中稀有的分支。他们的贡献是提高代码覆盖率。而fishfuzz是最大化触发的目标。Yue将适应性能量调度和博弈论结合起来，来防止测试没用的种子。wang基于软件分析选择有趣的目标，然后结合一种新的队列策略。然而，他们的方法只考虑了时间不变的target，也就不会自适应地调整fuzz的能量到更有可能发现漏洞的位置。FishFuzz的队列切换方式是自适应的，而且可以被用来提高wang的工作。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>给定一个目标程序，会编译并用sanitizer插桩，并且提取一些有用的信息。整体流程和通常的模糊测试差不多。主要修改的地方是距离指标和种子选择的实现。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023182021870.png" alt="image-20221023182021870"></p>
+<h3 id="Program-Preparation"><a href="#Program-Preparation" class="headerlink" title="Program Preparation"></a>Program Preparation</h3><p>在程序分析阶段，主要是提取sanitizer插入的target。但由于有些target可能会是不可达的。现有的方法使用静态分析来剔除，但静态分析有可能会误删。因此，FishFuzz将所有的目标都视为有效地，通过动态排名来过滤不理想的目标。</p>
+<p>在编译阶段，提取了控制流图和调用图，此时的图没有考虑间接调用。然后，FishFuzz依赖CFG和CG的过程间距离来选择靠近目标的种子。这些操作都是基于LLVM IR上做的。</p>
+<h3 id="Queue-Culling-Algorithm"><a href="#Queue-Culling-Algorithm" class="headerlink" title="Queue Culling Algorithm"></a>Queue Culling Algorithm</h3><p>队列选择算法灵感源于捕鱼技术。在fuzzing的初期，Fishfuzz采取exploration模式，类似广撒网。当没有发现新的函数时，FishFuzz会去聚焦于最大化到达的目标，类似收网。当到达了足够多的目标时，cull的逻辑改变，尝试去触发有趣的目标（尽可能地抓到更多的鱼）。由于每个步骤都需要不同的指标（到达函数的数量，到达目标的数量，触发目标的数量），所以也像别的工作一样分阶段来做。</p>
+<p>主要分为三个阶段：Inter-function exploration，intra-function exploration ，exploitation。</p>
+<ul>
+<li><p>inter-function exploration：到达感兴趣的函数。</p>
+</li>
+<li><p>intra-funcion exploration：函数内测试，主要是去尽可能地命中更多的目标。</p>
+</li>
+<li><p>exploitation：尽可能地触发更多可以到达目标。</p>
+</li>
+</ul>
+<p>他们的切换过程如下图所示，当没有发现新的函数的时候，就会从inter-function转为intra-function。当发现了新的函数，就会从intra-function转为inter-function。如果没有到达新的target，就会从intra-function切换到exploitation阶段。没有触发新的target，就会从exploitation回到intra-function。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221024210010657.png" alt="image-20221024210010657"></p>
+<p>inter-function exploration过程中，给定一个种子队列和一个函数集合。对于那些经过未探索的函数，并且包含目标的种子，将favor设为1。在把favored的种子提交给程序后，FishFuzz更新探索过的函数列表，并且重复这个过程。getClosestSeedToFun会去找到离目标函数f最近的种子。</p>
+<p>exploitation过程中，FishFuzz会尝试触发已到达的目标。他的思路是通过不同的种子来命中同一目标，能够增加发现bug的概率。首先，使用那些能到达的目标。在trgs_to_visit中，选择前20%命中的目标。对于每个合适的目标，getFastestSeedToTarget返回最快到达t的种子s。这个过程中，有很大的概率选择命中目标的种子（seed target distance&#x3D;0）。</p>
+<h3 id="距离指标"><a href="#距离指标" class="headerlink" title="距离指标"></a>距离指标</h3><p>距离指标分为：</p>
+<ul>
+<li>静态函数距离</li>
+<li>动态种子到函数的距离</li>
+<li>动态种子到多目标的距离</li>
+</ul>
+<p>静态函数距离指的是调用图上两个函数最短的边的数量。</p>
+<p>动态种子到函数的距离，分为以下两种情况，如果种子经过了目标函数，距离则为0，如果没有经过，距离为最近的那个函数到种子的距离。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105710952.png" alt="image-20221025105710952"></p>
+<p>动态种子到多个目标的距离，是由多个种子到各个目标的距离组成的一个向量。会在这个函数用到getFastestSeedToTarget</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105651544.png" alt="image-20221025105651544"></p>
+<p>种子到单个目标的距离为前面的距离，加上一个目标是否被触发的条件。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025105750760.png" alt="image-20221025105750760"></p>
+<p>这里很奇怪，给了一个向量，要怎么比距离？向量的比较方式，论文中没有说明。</p>
+<p>关于间接调用的问题。种子到函数的距离被表示为最小函数的距离，作者认为这种方法可以找到近似最佳的结果。当一个种子遍历到间接调用时，fishfuzz可以使用附近的函数来估计种子执行路径到目标函数的距离。如果一个函数没有和其他函数直接联系，模糊器要么生成一个到达该函数的种子，要么生成一个无法到达的种子。实际上，这种方法和以前一个使用fuzzing来探索间接调用的工作相同。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>基于AFL 2.57b实现，插桩使用的是LLVM 12.0.1。实现函数内探索和利用阶段，用了2500行的代码。对于插桩部分，代码有1500行。</p>
+<p>源码和复现相关的材料在被接收后就会开源。目前已开源在：<a target="_blank" rel="noopener" href="https://zenodo.org/record/6405418">https://zenodo.org/record/6405418</a></p>
+<h2 id="实验结果及分析"><a href="#实验结果及分析" class="headerlink" title="实验结果及分析"></a>实验结果及分析</h2><p>回答6个问题：</p>
+<ul>
+<li>FishFuzz能到达多少目标？</li>
+<li>FishFuzz能够平衡能量吗？</li>
+<li>FishFuzz发现漏洞的效率怎么样？</li>
+<li>FishFuzz能发现新漏洞吗？</li>
+<li>FishFuzz是如何重新分配exploration和exploitation？</li>
+<li>其他的fuzzer能够从我们的策略受益吗？</li>
+</ul>
+<p>对比工具选择了TortoiseFuzz，ParmeSan和SAVIOR。同时AFL++和AFL也被作为baseline。</p>
+<p>benchmark方面，选择了TortoiseFuzz、SAVIOR和ParmeSan测试的程序。TortoiseFuzz用的程序会被ASAN插桩，在文章中叫ASAN benchmark。SAVIOR测的程序只包含UBSan sanitizer，就叫UBSAN benchmark。</p>
+<h3 id="RQ1"><a href="#RQ1" class="headerlink" title="RQ1"></a>RQ1</h3><p>这个实验评估的指标主要是覆盖率和目标覆盖率。</p>
+<p>对比ParmeSan和TortoiseFuzz。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023163233076.png" alt="image-20221023163233076"></p>
+<p>和SAVIOR进行对比的结果。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221023163242967.png" alt="image-20221023163242967"></p>
+<h3 id="RQ2"><a href="#RQ2" class="headerlink" title="RQ2"></a>RQ2</h3><p>这个部分评估FishFuzz为目标重新分配能量的能力。与AFL进行对比，跑3轮24小时。下面的图展示了FishFuzz尝试去分配能量给那些测试比较少的target。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025113308569.png" alt="image-20221025113308569"></p>
+<h3 id="RQ3"><a href="#RQ3" class="headerlink" title="RQ3"></a>RQ3</h3><p>这个实验中是评估exploitation阶段触发漏洞的能力。主要是比发现的漏洞的数量。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114407436.png" alt="image-20221025114407436"></p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114416052.png" alt="image-20221025114416052"></p>
+<h3 id="RQ4"><a href="#RQ4" class="headerlink" title="RQ4"></a>RQ4</h3><p>找了28个顶会里用的程序，对于每个程序用ASan和UBSan插桩，用一周的时间去找漏洞。最后发现了25个新的漏洞，其中18个被确认为CVE。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114530188.png" alt="image-20221025114530188"></p>
+<h3 id="RQ5"><a href="#RQ5" class="headerlink" title="RQ5"></a>RQ5</h3><p>这个实验主要是看三个阶段的覆盖率，触发的目标和轨迹。下面这个图展示了各个fuzzer阶段覆盖的边的情况。蓝色是inter-function，绿色是intra-function，红色是exploitation。覆盖率在exploration阶段的时候，快速上升。在exploitation（红色）阶段，覆盖率趋于平稳。两种exploration阶段在开始阶段比较频繁出现，exploitation阶段则倾向于在后期出现。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114940865.png" alt="image-20221025114940865"></p>
+<h3 id="RQ6"><a href="#RQ6" class="headerlink" title="RQ6"></a>RQ6</h3><p>和其他fuzzer结合的能力如何，明显比afl和qsym的相性好。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221025114612407.png" alt="image-20221025114612407"></p>
+<h2 id="论文总结"><a href="#论文总结" class="headerlink" title="论文总结"></a>论文总结</h2><h2 id="自己的感受"><a href="#自己的感受" class="headerlink" title="自己的感受"></a>自己的感受</h2><p>读完论文后，自己的想法<br>论文有哪些优点和亮点<br>论文还有哪些问题没有解决<br>有哪些启发，可以继续探索</p>
+<p>作者很贴心地附上了画韦恩图的工具：jvenn: an interactive venn diagram viewer</p>
+<p>tortoisefuzz我得看看，之前给我的印象并不是定向模糊测试。</p>
+<p>Mann-Whitney U test，这个概念在windranger中也看到过，当时没有特别注意。有时间再搜搜看。</p>
+<p>文章留了很多阈值调参来作为后续的工作。阈值是不是也是程序无关的呢？</p>
+<p>arxiv上的写作上还有些瑕疵。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/paper/" rel="tag"># paper</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/17/WindRanger%20A%20Directed%20Greybox%20Fuzzer%20driven%20by%20Deviation%20Basic%20Blocks/" rel="prev" title="【论文笔记】WindRanger:A Directed Greybox Fuzzer driven by Deviation Basic Blocks">
+      <i class="fa fa-chevron-left"></i> 【论文笔记】WindRanger:A Directed Greybox Fuzzer driven by Deviation Basic Blocks
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#FishFuzz-Throwing-Larger-Nets-to-Catch-Deeper-Bugs"><span class="nav-number">1.</span> <span class="nav-text">FishFuzz: Throwing Larger Nets to Catch Deeper Bugs</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">论文基本信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E6%A6%82%E8%BF%B0"><span class="nav-number">1.2.</span> <span class="nav-text">论文概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">研究背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.4.</span> <span class="nav-text">相关工作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E5%90%91%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">1.4.1.</span> <span class="nav-text">定向模糊测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E9%98%B6%E6%AE%B5%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">1.4.2.</span> <span class="nav-text">多阶段模糊测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.5.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Program-Preparation"><span class="nav-number">1.5.1.</span> <span class="nav-text">Program Preparation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Queue-Culling-Algorithm"><span class="nav-number">1.5.2.</span> <span class="nav-text">Queue Culling Algorithm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%9D%E7%A6%BB%E6%8C%87%E6%A0%87"><span class="nav-number">1.5.3.</span> <span class="nav-text">距离指标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.6.</span> <span class="nav-text">具体实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E5%8F%8A%E5%88%86%E6%9E%90"><span class="nav-number">1.7.</span> <span class="nav-text">实验结果及分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ1"><span class="nav-number">1.7.1.</span> <span class="nav-text">RQ1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ2"><span class="nav-number">1.7.2.</span> <span class="nav-text">RQ2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ3"><span class="nav-number">1.7.3.</span> <span class="nav-text">RQ3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ4"><span class="nav-number">1.7.4.</span> <span class="nav-text">RQ4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ5"><span class="nav-number">1.7.5.</span> <span class="nav-text">RQ5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ6"><span class="nav-number">1.7.6.</span> <span class="nav-text">RQ6</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E6%80%BB%E7%BB%93"><span class="nav-number">1.8.</span> <span class="nav-text">论文总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%B7%B1%E7%9A%84%E6%84%9F%E5%8F%97"><span class="nav-number">1.9.</span> <span class="nav-text">自己的感受</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="iskindar"
+      src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+  <p class="site-author-name" itemprop="name">iskindar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iskindar" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iskindar" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:iskindar97@gmail.com" title="E-Mail → mailto:iskindar97@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iskindar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/model/katou_01/katou_01.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

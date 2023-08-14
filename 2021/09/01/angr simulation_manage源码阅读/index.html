@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iskindar.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="angr模拟执行源码解析前言 angr是很有名的二进制符号执行工具，网上有许多关于angr的源码解析的文章。但是好像还没有关于angr模拟执行模块的解析。而模拟执行部分也是angr中相当重要的一个部分。因此，本文将解析angr模拟执行部分的源码，来帮助大家了解angr模拟执行的基本原理。 概述 当我们用angr去符号执行的时候，最基本的几个操作如下面代码所示：导入代码（第1行）、导入二进制（第2行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="源码解析angr模拟执行">
+<meta property="og:url" content="http://iskindar.github.io/2021/09/01/angr%20simulation_manage%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/index.html">
+<meta property="og:site_name" content="iskindar的博客">
+<meta property="og:description" content="angr模拟执行源码解析前言 angr是很有名的二进制符号执行工具，网上有许多关于angr的源码解析的文章。但是好像还没有关于angr模拟执行模块的解析。而模拟执行部分也是angr中相当重要的一个部分。因此，本文将解析angr模拟执行部分的源码，来帮助大家了解angr模拟执行的基本原理。 概述 当我们用angr去符号执行的时候，最基本的几个操作如下面代码所示：导入代码（第1行）、导入二进制（第2行">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-01T06:33:29.000Z">
+<meta property="article:modified_time" content="2023-08-14T07:44:56.165Z">
+<meta property="article:author" content="iskindar">
+<meta property="article:tag" content="symbolic execution">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://iskindar.github.io/2021/09/01/angr%20simulation_manage%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>源码解析angr模拟执行 | iskindar的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9a79db5615c4a0bf77e512dd81c44895";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">iskindar的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Into the Night !</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/iskindar" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2021/09/01/angr%20simulation_manage%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          源码解析angr模拟执行
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-01 14:33:29" itemprop="dateCreated datePublished" datetime="2021-09-01T14:33:29+08:00">2021-09-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 15:44:56" itemprop="dateModified" datetime="2023-08-14T15:44:56+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="angr模拟执行源码解析"><a href="#angr模拟执行源码解析" class="headerlink" title="angr模拟执行源码解析"></a>angr模拟执行源码解析</h1><p>前言</p>
+<p>angr是很有名的二进制符号执行工具，网上有许多关于angr的源码解析的文章。但是好像还没有关于angr模拟执行模块的解析。而模拟执行部分也是angr中相当重要的一个部分。因此，本文将解析angr模拟执行部分的源码，来帮助大家了解angr模拟执行的基本原理。</p>
+<p>概述</p>
+<p>当我们用angr去符号执行的时候，最基本的几个操作如下面代码所示：导入代码（第1行）、导入二进制（第2行）、确定初始状态（第3行）、构建simulation_manager对象（第4行）、符号执行（第5行）。而到底angr是怎么符号执行的呢？因此就需要深入simulation_manager的源码去一探究竟了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">import angr</span><br><span class="line">p = angr.Project(&quot;xxxx&quot;)</span><br><span class="line">entry_state = p.factory.entry_state()</span><br><span class="line">simgr = p.factory.simgr(entry_state)</span><br><span class="line">simgr.explore(find=xxxx)</span><br></pre></td></tr></table></figure>
+
+<p>simulation_manager这个类位于angr&#x2F;sim_manager.py文件里。</p>
+<p>simulation_manager是angr中模拟执行管理器。主要的操作对象是程序的状态对象（sim_state）。状态都被放在stash里，可以往前执行、过滤、合并或者移到别的stash里。stash里可以理解为是放状态的一个列表，stash有这么几种，分别表示状态的状态：</p>
+<ul>
+<li>active：保存接下来要执行的状态</li>
+<li>deadended：由于某些原因不能再继续执行下去，比如没有合法的指令、下个节点的状态不可解，或者有一个非法的指令指针。</li>
+<li>pruned：当使用lazy_sovles的策略时，只有在必要的时候才去检查状态是否可解。当发现一个不可求解的节点后，将其后面的节点都优化掉，放在pruned里。</li>
+<li>unconstrained：比如PC被用户数据或者其他类型的符号变量所控制，导致不知道执行哪个指令。</li>
+<li>unsat：不可求解的状态。比如，输入同时为AAAA和BBBB。</li>
+</ul>
+<p>接下来看看源码，源码中提示我们看simulation_manager的三个重要方法：step、explore、use_technique。</p>
+<h3 id="use-technique"><a href="#use-technique" class="headerlink" title="use_technique"></a>use_technique</h3><p>angr里有自带很多启发式的路径探索方法。这个函数就是让simulation_manager能够调用外部写好的启发式路径搜索方法。官方给出的几个样例里，除了经典的深度优先搜索、也有检测内存使用情况、CMU论文里的Veritest（合并循环的状态）等等策略。</p>
+<p>代码首先先判断tech是否属于ExplorationTechnique这个类。然后setup方法开始初始化。然后把tech防到techniques列表中去，这也意味着可以使用多种策略。这里的hookset暂时没有看懂。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">use_technique</span>(<span class="params">self, tech</span>):</span><br><span class="line">       <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">       Use an exploration technique with this SimulationManager.</span></span><br><span class="line"><span class="string">       Techniques can be found in :mod:`angr.exploration_techniques`.</span></span><br><span class="line"><span class="string">       :param tech:    An ExplorationTechnique object that contains code to modify</span></span><br><span class="line"><span class="string">                       this SimulationManager&#x27;s behavior.</span></span><br><span class="line"><span class="string">       :type tech:     ExplorationTechnique</span></span><br><span class="line"><span class="string">       :return:        The technique that was added, for convenience</span></span><br><span class="line"><span class="string">       &quot;&quot;&quot;</span></span><br><span class="line">       <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">isinstance</span>(tech, ExplorationTechnique):</span><br><span class="line">           <span class="keyword">raise</span> SimulationManagerError</span><br><span class="line"></span><br><span class="line">       <span class="comment"># <span class="doctag">XXX:</span> as promised</span></span><br><span class="line">       tech.project = self._project</span><br><span class="line">       tech.setup(self)</span><br><span class="line"></span><br><span class="line">       HookSet.install_hooks(self, **tech._get_hooks())</span><br><span class="line">       self._techniques.append(tech)</span><br><span class="line">       <span class="keyword">return</span> tech</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="explore"><a href="#explore" class="headerlink" title="explore"></a>explore</h3><p>先来看看看explore函数的参数，有stash，n，find，avoid等参数。explore函数的功能是从某个类型的stash，比如active，开始寻找满足find条件的，需要避免avoid条件的状态，直到找了n次，或者找到了num_find个状态。然后找到的状态都会塞到find_stash里，筛选的状态都会放在avoid_stash里。</p>
+<p>其中find和avoid参数可以是一个地址，或者一堆地址的集合或者列表，甚至可以是一个函数，以状态为输入，输出True 或者False，来表示该状态是否是要寻找的状态。如果angr的CFG作为cfg的参数并且find是一个地址或者一个列表或者集合，那么到达不了目标状态的状态就会先把提前筛选掉。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">explore</span>(<span class="params">self, stash=<span class="string">&#x27;active&#x27;</span>, n=<span class="literal">None</span>, find=<span class="literal">None</span>, avoid=<span class="literal">None</span>, find_stash=<span class="string">&#x27;found&#x27;</span>, avoid_stash=<span class="string">&#x27;avoid&#x27;</span>, cfg=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">                num_find=<span class="number">1</span>, **kwargs</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Tick stash &quot;stash&quot; forward (up to &quot;n&quot; times or until &quot;num_find&quot; states are found), looking for condition &quot;find&quot;,</span></span><br><span class="line"><span class="string">        avoiding condition &quot;avoid&quot;. Stores found states into &quot;find_stash&#x27; and avoided states into &quot;avoid_stash&quot;.</span></span><br><span class="line"><span class="string">        The &quot;find&quot; and &quot;avoid&quot; parameters may be any of:</span></span><br><span class="line"><span class="string">        - An address to find</span></span><br><span class="line"><span class="string">        - A set or list of addresses to find</span></span><br><span class="line"><span class="string">        - A function that takes a state and returns whether or not it matches.</span></span><br><span class="line"><span class="string">        If an angr CFG is passed in as the &quot;cfg&quot; parameter and &quot;find&quot; is either a number or a list or a set, then</span></span><br><span class="line"><span class="string">        any states which cannot possibly reach a success state without going through a failure state will be</span></span><br><span class="line"><span class="string">        preemptively avoided.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        num_find += <span class="built_in">len</span>(self._stashes[find_stash]) <span class="keyword">if</span> find_stash <span class="keyword">in</span> self._stashes <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">        tech = self.use_technique(Explorer(find, avoid, find_stash, avoid_stash, cfg, num_find))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Modify first Veritesting so that they can work together.</span></span><br><span class="line">        deviation_filter_saved = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">for</span> t <span class="keyword">in</span> self._techniques:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(t,Veritesting):</span><br><span class="line">                deviation_filter_saved = t.options.get(<span class="string">&quot;deviation_filter&quot;</span>,<span class="literal">None</span>)</span><br><span class="line">                <span class="keyword">if</span> deviation_filter_saved <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                    t.options[<span class="string">&quot;deviation_filter&quot;</span>] = <span class="keyword">lambda</span> s: tech.find(s) <span class="keyword">or</span> tech.avoid(s) <span class="keyword">or</span> deviation_filter_saved(s)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    t.options[<span class="string">&quot;deviation_filter&quot;</span>] = <span class="keyword">lambda</span> s: tech.find(s) <span class="keyword">or</span> tech.avoid(s)</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self.run(stash=stash, n=n, **kwargs)</span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            self.remove_technique(tech)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> t <span class="keyword">in</span> self._techniques:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(t,Veritesting):</span><br><span class="line">                <span class="keyword">if</span> deviation_filter_saved <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">                    <span class="keyword">del</span> t.options[<span class="string">&quot;deviation_filter&quot;</span>]</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    t.options[<span class="string">&quot;deviation_filter&quot;</span>] = deviation_filter_saved</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> self</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>宏观来看explore函数分为三部分：初始化，兼容veritest策略，探索（run）。兼容veritest策略的代码占了很多，对于理解veritest策略与其他策略的关系很有帮助，但是对我们理解符号执行帮助较小，这里就不赘述了。</p>
+<p>首先，更新num_find的参数为设定的num_find参数加上找到的状态。接着，用传入的参数find，avoid等生成Explorer对象，然后再用use_technique方法生成一个tech对象。这里为什么要生成Explore对象，然后再用use_technique方法？</p>
+<p>Explorer对象继承了ExplorationTechnique类，所以他也是一种探索策略，并且是一种最基础的策略。</p>
+<p>而符号执行过程中，可以使用多种策略，那么如何综合这些策略呢？angr是把他们都放在了simulation_manager里的_.techniques列表里，而use_technique方法的作用正是把策略对象放进这个techniques列表里。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">num_find += <span class="built_in">len</span>(self._stashes[find_stash]) <span class="keyword">if</span> find_stash <span class="keyword">in</span> self._stashes <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">tech = self.use_technique(Explorer(find, avoid, find_stash, avoid_stash, cfg, num_find))</span><br></pre></td></tr></table></figure>
+
+<p>初始化后，接下来就是去探索状态部分。简单的一个try，finally语句。不论run的结果如何，最后都把基础探索策略移出_techniques列表里。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">try:</span><br><span class="line">	self.run(stash=stash, n=n, **kwargs)</span><br><span class="line">finally:</span><br><span class="line">	self.remove_technique(tech)</span><br></pre></td></tr></table></figure>
+
+<p>run函数的代码如下，思路很简单，根据当前的探索策略，一直探索，直到到达一个完整的状态。如果策略里没定义完整的策略，那就把stash里的状态都跑完。run里涉及到了后面会讲的step函数，这里可以先简单理解为单步符号执行。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self, stash=<span class="string">&#x27;active&#x27;</span>, n=<span class="literal">None</span>, until=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Run until the SimulationManager has reached a completed state, according to</span></span><br><span class="line"><span class="string">        the current exploration techniques. If no exploration techniques that define a completion</span></span><br><span class="line"><span class="string">        state are being used, run until there is nothing left to run.</span></span><br><span class="line"><span class="string">        :param stash:       Operate on this stash</span></span><br><span class="line"><span class="string">        :param n:           Step at most this many times</span></span><br><span class="line"><span class="string">        :param until:       If provided, should be a function that takes a SimulationManager and</span></span><br><span class="line"><span class="string">                            returns True or False. Stepping will terminate when it is True.</span></span><br><span class="line"><span class="string">        :return:            The simulation manager, for chaining.</span></span><br><span class="line"><span class="string">        :rtype:             SimulationManager</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> _ <span class="keyword">in</span> (itertools.count() <span class="keyword">if</span> n <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> <span class="built_in">range</span>(<span class="number">0</span>, n)):</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> self.complete() <span class="keyword">and</span> self._stashes[stash]:</span><br><span class="line">                self.step(stash=stash, **kwargs)</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> (until <span class="keyword">and</span> until(self)):</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">return</span> self</span><br></pre></td></tr></table></figure>
+
+<h3 id="step"><a href="#step" class="headerlink" title="step"></a>step</h3><p>最后就是这个比较复杂的step函数了，可以看作是符号执行的基本单元了。相比explore函数的参数多了selector_func，step_func，successor_func，filter_func，until。这些参数的意思代码注释写得比较清楚了，就简单翻译一下。这些参数都是一个以状态为输入，返回各种东西（比如bool值，后继节点等）的一个函数，类似下面的代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">fun</span>(<span class="params">state</span>):</span><br><span class="line">	<span class="keyword">if</span> state.addr == xxxx:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>selector_func：如果为True，将会继续步进，反之会被保留。</li>
+<li>successor_func：返回的是后继节点，后面将会使用这些后继节点去符号执行。反之，则是使用project.factory.successors的后继节点。</li>
+<li>filter_func：返回的是stash的名字。filter_func的主要作用是给状态分类，分到各个stash里去。</li>
+<li>step_func：与前面参数不同，输入是为simulation_manger对象，并返回simulation_manager对象。这个函数会在simulation_manager对象每次step的时候被调用。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">step</span>(<span class="params">self, stash=<span class="string">&#x27;active&#x27;</span>, n=<span class="literal">None</span>, selector_func=<span class="literal">None</span>, step_func=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">            successor_func=<span class="literal">None</span>, until=<span class="literal">None</span>, filter_func=<span class="literal">None</span>, **run_args</span>):</span><br><span class="line">       <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">       Step a stash of states forward and categorize the successors appropriately.</span></span><br><span class="line"><span class="string">       The parameters to this function allow you to control everything about the stepping and</span></span><br><span class="line"><span class="string">       categorization process.</span></span><br><span class="line"><span class="string">       :param stash:           The name of the stash to step (default: &#x27;active&#x27;)</span></span><br><span class="line"><span class="string">       :param selector_func:   If provided, should be a function that takes a state and returns a</span></span><br><span class="line"><span class="string">                               boolean. If True, the state will be stepped. Otherwise, it will be</span></span><br><span class="line"><span class="string">                               kept as-is.</span></span><br><span class="line"><span class="string">       :param step_func:       If provided, should be a function that takes a SimulationManager and</span></span><br><span class="line"><span class="string">                               returns a SimulationManager. Will be called with the SimulationManager</span></span><br><span class="line"><span class="string">                               at every step. Note that this function should not actually perform any</span></span><br><span class="line"><span class="string">                               stepping - it is meant to be a maintenance function called after each step.</span></span><br><span class="line"><span class="string">       :param successor_func:  If provided, should be a function that takes a state and return its successors.</span></span><br><span class="line"><span class="string">                               Otherwise, project.factory.successors will be used.</span></span><br><span class="line"><span class="string">       :param filter_func:     If provided, should be a function that takes a state and return the name</span></span><br><span class="line"><span class="string">                               of the stash, to which the state should be moved.</span></span><br><span class="line"><span class="string">       :param until:           (DEPRECATED) If provided, should be a function that takes a SimulationManager and</span></span><br><span class="line"><span class="string">                               returns True or False. Stepping will terminate when it is True.</span></span><br><span class="line"><span class="string">       :param n:               (DEPRECATED) The number of times to step (default: 1 if &quot;until&quot; is not provided)</span></span><br><span class="line"><span class="string">       Additionally, you can pass in any of the following keyword args for project.factory.successors:</span></span><br><span class="line"><span class="string">       :param jumpkind:        The jumpkind of the previous exit</span></span><br><span class="line"><span class="string">       :param addr:            An address to execute at instead of the state&#x27;s ip.</span></span><br><span class="line"><span class="string">       :param stmt_whitelist:  A list of stmt indexes to which to confine execution.</span></span><br><span class="line"><span class="string">       :param last_stmt:       A statement index at which to stop execution.</span></span><br><span class="line"><span class="string">       :param thumb:           Whether the block should be lifted in ARM&#x27;s THUMB mode.</span></span><br><span class="line"><span class="string">       :param backup_state:    A state to read bytes from instead of using project memory.</span></span><br><span class="line"><span class="string">       :param opt_level:       The VEX optimization level to use.</span></span><br><span class="line"><span class="string">       :param insn_bytes:      A string of bytes to use for the block instead of the project.</span></span><br><span class="line"><span class="string">       :param size:            The maximum size of the block, in bytes.</span></span><br><span class="line"><span class="string">       :param num_inst:        The maximum number of instructions.</span></span><br><span class="line"><span class="string">       :param traceflags:      traceflags to be passed to VEX. Default: 0</span></span><br><span class="line"><span class="string">       :returns:           The simulation manager, for chaining.</span></span><br><span class="line"><span class="string">       :rtype:             SimulationManager</span></span><br><span class="line"><span class="string">       &quot;&quot;&quot;</span></span><br><span class="line">       l.info(<span class="string">&quot;Stepping %s of %s&quot;</span>, stash, self)</span><br><span class="line">       <span class="comment"># 8&lt;----------------- Compatibility layer -----------------</span></span><br><span class="line">       <span class="keyword">if</span> n <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">or</span> until <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">           <span class="keyword">if</span> once(<span class="string">&#x27;simgr_step_n_until&#x27;</span>):</span><br><span class="line">               <span class="built_in">print</span>(<span class="string">&quot;\x1b[31;1mDeprecation warning: the use of `n` and `until` arguments is deprecated. &quot;</span></span><br><span class="line">                     <span class="string">&quot;Consider using simgr.run() with the same arguments if you want to specify &quot;</span></span><br><span class="line">                     <span class="string">&quot;a number of steps or an additional condition on when to stop the execution.\x1b[0m&quot;</span>)</span><br><span class="line">           <span class="keyword">return</span> self.run(stash, n, until, selector_func=selector_func, step_func=step_func,</span><br><span class="line">                           successor_func=successor_func, filter_func=filter_func, **run_args)</span><br><span class="line">       <span class="comment"># ------------------ Compatibility layer ----------------&gt;8</span></span><br><span class="line">       bucket = defaultdict(<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">       <span class="keyword">for</span> state <span class="keyword">in</span> self._fetch_states(stash=stash):</span><br><span class="line"></span><br><span class="line">           goto = self.<span class="built_in">filter</span>(state, filter_func=filter_func)</span><br><span class="line">           <span class="keyword">if</span> <span class="built_in">isinstance</span>(goto, <span class="built_in">tuple</span>):</span><br><span class="line">               goto, state = goto</span><br><span class="line"></span><br><span class="line">           <span class="keyword">if</span> goto <span class="keyword">not</span> <span class="keyword">in</span> (<span class="literal">None</span>, stash):</span><br><span class="line">               bucket[goto].append(state)</span><br><span class="line">               <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">           <span class="keyword">if</span> <span class="keyword">not</span> self.selector(state, selector_func=selector_func):</span><br><span class="line">               bucket[stash].append(state)</span><br><span class="line">               <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">           pre_errored = <span class="built_in">len</span>(self._errored)</span><br><span class="line"></span><br><span class="line">           successors = self.step_state(state, successor_func=successor_func, **run_args)</span><br><span class="line">           <span class="comment"># handle degenerate stepping cases here. desired behavior:</span></span><br><span class="line">           <span class="comment"># if a step produced only unsat states, always add them to the unsat stash since this usually indicates a bug</span></span><br><span class="line">           <span class="comment"># if a step produced sat states and save_unsat is False, drop the unsats</span></span><br><span class="line">           <span class="comment"># if a step produced no successors, period, add the original state to deadended</span></span><br><span class="line"></span><br><span class="line">           <span class="comment"># first check if anything happened besides unsat. that gates all this behavior</span></span><br><span class="line">           <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">any</span>(v <span class="keyword">for</span> k, v <span class="keyword">in</span> successors.items() <span class="keyword">if</span> k != <span class="string">&#x27;unsat&#x27;</span>) <span class="keyword">and</span> <span class="built_in">len</span>(self._errored) == pre_errored:</span><br><span class="line">               <span class="comment"># then check if there were some unsats</span></span><br><span class="line">               <span class="keyword">if</span> successors.get(<span class="string">&#x27;unsat&#x27;</span>, []):</span><br><span class="line">                   <span class="comment"># only unsats. current setup is acceptable.</span></span><br><span class="line">                   <span class="keyword">pass</span></span><br><span class="line">               <span class="keyword">else</span>:</span><br><span class="line">                   <span class="comment"># no unsats. we&#x27;ve deadended.</span></span><br><span class="line">                   bucket[<span class="string">&#x27;deadended&#x27;</span>].append(state)</span><br><span class="line">                   <span class="keyword">continue</span></span><br><span class="line">           <span class="keyword">else</span>:</span><br><span class="line">               <span class="comment"># there were sat states. it&#x27;s okay to drop the unsat ones if the user said so.</span></span><br><span class="line">               <span class="keyword">if</span> <span class="keyword">not</span> self._save_unsat:</span><br><span class="line">                   successors.pop(<span class="string">&#x27;unsat&#x27;</span>, <span class="literal">None</span>)</span><br><span class="line"></span><br><span class="line">           <span class="keyword">for</span> to_stash, successor_states <span class="keyword">in</span> successors.items():</span><br><span class="line">               bucket[to_stash <span class="keyword">or</span> stash].extend(successor_states)</span><br><span class="line"></span><br><span class="line">       self._clear_states(stash=stash)</span><br><span class="line">       <span class="keyword">for</span> to_stash, states <span class="keyword">in</span> bucket.items():</span><br><span class="line">           self._store_states(to_stash <span class="keyword">or</span> stash, states)</span><br><span class="line"></span><br><span class="line">       <span class="keyword">if</span> step_func <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">           <span class="keyword">return</span> step_func(self)</span><br><span class="line">       <span class="keyword">return</span> self</span><br></pre></td></tr></table></figure>
+
+<p>首先，从stash里取出一个状态，调用filter函数看下该状态最后要去哪个stash里，如果不是当前的stash，则把该状态塞到应该放的stash的地方，然后取下一个状态。调用selector函数，选择要保留的状态。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">bucket = defaultdict(<span class="built_in">list</span>)</span><br><span class="line"><span class="comment"># 依次从stash里取出状态</span></span><br><span class="line"><span class="keyword">for</span> state <span class="keyword">in</span> self._fetch_states(stash=stash): </span><br><span class="line">    goto = self.<span class="built_in">filter</span>(state, filter_func=filter_func) <span class="comment"># 返回的是个元组，（状态该去的stash，状态）</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(goto, <span class="built_in">tuple</span>):</span><br><span class="line">    	goto, state = goto</span><br><span class="line">    <span class="comment">#如果要去的stash不是当前的stash，也不是None，</span></span><br><span class="line">    <span class="keyword">if</span> goto <span class="keyword">not</span> <span class="keyword">in</span> (<span class="literal">None</span>, stash):</span><br><span class="line">        <span class="comment"># 那么把他放进该去的stash里，就不管他了。也就筛选掉了。</span></span><br><span class="line">    	bucket[goto].append(state) <span class="comment"># </span></span><br><span class="line">    	<span class="keyword">continue</span></span><br><span class="line">    <span class="comment"># 如果selector函数返回False，则需要保留该状态到当前的stash</span></span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> self.selector(state, selector_func=selector_func):</span><br><span class="line">        <span class="comment"># 保留状态</span></span><br><span class="line">        bucket[stash].append(state)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+<p>如果没有触发selector或者filter，就去找后继节点。这里调用了step_state函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> state <span class="keyword">in</span> self._fetch_states(stash=stash):</span><br><span class="line">    ...</span><br><span class="line">	successors = self.step_state(state, successor_func=successor_func, **run_args)</span><br><span class="line">	</span><br></pre></td></tr></table></figure>
+
+<p>step_state函数如下所示，这个函数主要是处理后继节点的状态。将不可解的状态，无约束的状态都放在相应的stash里。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">step_state</span>(<span class="params">self, state, successor_func=<span class="literal">None</span>, **run_args</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Don&#x27;t use this function manually - it is meant to interface with exploration techniques.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        successors = self.successors(state, successor_func=successor_func, **run_args)</span><br><span class="line">        stashes = &#123;<span class="literal">None</span>: successors.flat_successors,</span><br><span class="line">                   <span class="string">&#x27;unsat&#x27;</span>: successors.unsat_successors,</span><br><span class="line">                   <span class="string">&#x27;unconstrained&#x27;</span>: successors.unconstrained_successors&#125;	</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">	...</span><br><span class="line">    <span class="keyword">return</span> stashes</span><br></pre></td></tr></table></figure>
+
+<p>由于step_state函数可能会发生很多错误，因此后续的代码是去做后继节点错误状态的处理。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> state <span class="keyword">in</span> self._fetch_states(stash=stash): </span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">#如果有后继节点有任何一个unsat状态或者发生了新的错误</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">any</span>(v <span class="keyword">for</span> k, v <span class="keyword">in</span> successors.items() <span class="keyword">if</span> k != <span class="string">&#x27;unsat&#x27;</span>) <span class="keyword">and</span> <span class="built_in">len</span>(self._errored) == pre_errored:</span><br><span class="line">        <span class="comment">#对于unsat状态，就先不管他</span></span><br><span class="line">        <span class="keyword">if</span> successors.get(<span class="string">&#x27;unsat&#x27;</span>, []):</span><br><span class="line">            <span class="comment"># only unsats. current setup is acceptable.</span></span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment">#如果不是unsat，那说明遇到某些原因终止了，把该状态加到deadended的stash里去。</span></span><br><span class="line">            bucket[<span class="string">&#x27;deadended&#x27;</span>].append(state)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">    <span class="comment"># 如果没有设置保留unsat状态，就把后继节点的unsat状态丢出去。</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self._save_unsat:</span><br><span class="line">            successors.pop(<span class="string">&#x27;unsat&#x27;</span>, <span class="literal">None</span>)</span><br><span class="line">	</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>接下来就把后继节点加到bucket的to_stash或者stash里去。自此，这个for循环就结束了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> state <span class="keyword">in</span> self._fetch_states(stash=stash): </span><br><span class="line">...</span><br><span class="line">    <span class="keyword">for</span> to_stash, successor_states <span class="keyword">in</span> successors.items():</span><br><span class="line">        bucket[to_stash <span class="keyword">or</span> stash].extend(successor_states)</span><br></pre></td></tr></table></figure>
+
+<p>剩下就是一些收尾工作，清空当前stash里的状态，然后再把bucket的内容存到simulation_manager对象的stash里去。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">self._clear_states(stash=stash)</span><br><span class="line"><span class="keyword">for</span> to_stash, states <span class="keyword">in</span> bucket.items():</span><br><span class="line">	self._store_states(to_stash <span class="keyword">or</span> stash, states)</span><br></pre></td></tr></table></figure>
+
+<p>如果有设置step_func，就去调用step_func。由此也能看到step_func是在step函数最后调用的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> step_func <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">	<span class="keyword">return</span> step_func(self)</span><br></pre></td></tr></table></figure>
+
+<p>最后用张图来总结。</p>
+<p>参考资料：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/angr/angr/tree/master/angr">https://github.com/angr/angr/tree/master/angr</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/symbolic-execution/" rel="tag"># symbolic execution</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/01/BovInspector/" rel="prev" title="BovInspector：一个自动化验证缓冲区溢出漏洞的工具">
+      <i class="fa fa-chevron-left"></i> BovInspector：一个自动化验证缓冲区溢出漏洞的工具
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/12/06/SyML%20Guiding%20Symbolic%20Execution%20Toward%20Vulnerable%20States%20Through%20Pattern%20Learning/" rel="next" title="【论文笔记】SyML, Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning">
+      【论文笔记】SyML, Guiding Symbolic Execution Toward Vulnerable States Through Pattern Learning <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#angr%E6%A8%A1%E6%8B%9F%E6%89%A7%E8%A1%8C%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">angr模拟执行源码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#use-technique"><span class="nav-number">1.0.1.</span> <span class="nav-text">use_technique</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#explore"><span class="nav-number">1.0.2.</span> <span class="nav-text">explore</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step"><span class="nav-number">1.0.3.</span> <span class="nav-text">step</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="iskindar"
+      src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+  <p class="site-author-name" itemprop="name">iskindar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iskindar" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iskindar" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:iskindar97@gmail.com" title="E-Mail → mailto:iskindar97@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iskindar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/model/katou_01/katou_01.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

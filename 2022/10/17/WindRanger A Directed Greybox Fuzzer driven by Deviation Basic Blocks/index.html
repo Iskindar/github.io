@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iskindar.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks论文基本信息发表年份：2022发表会议或期刊（简称，CCF级别）：CCF A类会议 ICSE论文标题（论文简称）：WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks论文一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【论文笔记】WindRanger:A Directed Greybox Fuzzer driven by Deviation Basic Blocks">
+<meta property="og:url" content="http://iskindar.github.io/2022/10/17/WindRanger%20A%20Directed%20Greybox%20Fuzzer%20driven%20by%20Deviation%20Basic%20Blocks/index.html">
+<meta property="og:site_name" content="iskindar的博客">
+<meta property="og:description" content="WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks论文基本信息发表年份：2022发表会议或期刊（简称，CCF级别）：CCF A类会议 ICSE论文标题（论文简称）：WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks论文一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017144152488.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017111305498.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017151610389.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017152201494.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017155609272.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017160401908.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017160917285.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017161118586.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017165833265.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017192625095.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017193237905.png">
+<meta property="og:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017194153448.png">
+<meta property="article:published_time" content="2022-10-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-14T08:02:17.122Z">
+<meta property="article:author" content="iskindar">
+<meta property="article:tag" content="paper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017144152488.png">
+
+<link rel="canonical" href="http://iskindar.github.io/2022/10/17/WindRanger%20A%20Directed%20Greybox%20Fuzzer%20driven%20by%20Deviation%20Basic%20Blocks/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【论文笔记】WindRanger:A Directed Greybox Fuzzer driven by Deviation Basic Blocks | iskindar的博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9a79db5615c4a0bf77e512dd81c44895";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">iskindar的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Into the Night !</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/iskindar" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://iskindar.github.io/2022/10/17/WindRanger%20A%20Directed%20Greybox%20Fuzzer%20driven%20by%20Deviation%20Basic%20Blocks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+      <meta itemprop="name" content="iskindar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="iskindar的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【论文笔记】WindRanger:A Directed Greybox Fuzzer driven by Deviation Basic Blocks
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-18 00:00:00" itemprop="dateCreated datePublished" datetime="2022-10-18T00:00:00+08:00">2022-10-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-08-14 16:02:17" itemprop="dateModified" datetime="2023-08-14T16:02:17+08:00">2023-08-14</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="WindRanger-A-Directed-Greybox-Fuzzer-driven-by-Deviation-Basic-Blocks"><a href="#WindRanger-A-Directed-Greybox-Fuzzer-driven-by-Deviation-Basic-Blocks" class="headerlink" title="WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks"></a>WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks</h1><h2 id="论文基本信息"><a href="#论文基本信息" class="headerlink" title="论文基本信息"></a>论文基本信息</h2><p>发表年份：2022<br>发表会议或期刊（简称，CCF级别）：CCF A类会议 ICSE<br>论文标题（论文简称）：WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks<br>论文一句话概述：提出了deviation basic block的概念，并利用它构造定向模糊测试。</p>
+<p>工具开源于：<a target="_blank" rel="noopener" href="https://sites.google.com/view/windranger-directed-fuzzing/">https://sites.google.com/view/windranger-directed-fuzzing/</a></p>
+<p>实验用的数据是unibench，开源于：</p>
+<h2 id="论文概述"><a href="#论文概述" class="headerlink" title="论文概述"></a>论文概述</h2><p>定向模糊测试是一种安全测试技术，致力于探索程序中的特定的位置。为了获取定向性，DGF优先选择那些执行路径离目标位置更近的种子。因此，评估种子执行路径到目标位置的距离对于定向模糊测试来说很重要。第一个定向灰盒测试器，AFLGo使用静态分析来计算基本块距离，并且在执行的过程中累积执行过基本块的距离来计算种子离目标的距离。顺延AFLGo，后续的定向模糊测试都使用所有的基本块计算距离，并且只考虑了控制流信息。然而，不是所有的基本块都是同等重要的，就有一些基本块（deviation basic block）的执行路径已经开始偏离目标位置。</p>
+<p>文章提出了一种名为WindRanger的技术，利用了deviation basic block来构造定向灰盒测试。为了识别deviation basic block，WindRanger不仅应用了静态可达性分析，也使用了动态过滤。为了构建定向模糊测试，WindRanger使用deviation basic block和他们相关的数据流信息来用于种子的距离计算，变异，种子选择，explore和exploit的切换。在3个数据集上使用了29个程序进行评估，实验结果表明WindRanger由于AFLGO，AFL和FairFuzz。而且还发现了1个在ffmpeg的0day漏洞。</p>
+<h2 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h2><p>问题是什么？现有的定向模糊测试计算距离的时候考虑了执行路径上的所有基本块，而且只考虑了控制流信息。然而，不是所有的基本块都是相同重要的，因为有一些开始偏离目标位置的基本块要另作考虑。</p>
+<p>意义是什么？能够更快到达目标，并泄露漏洞。</p>
+<h2 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h2><p>相关工作分为三类：定向符号执行，定向灰盒测试，覆盖率导向灰盒测试。</p>
+<p>定向符号执行使用协同程序信息来获取定向性，相比通用符号执行，能够有效地测试程序指定位置。然而，定向符号执行在真实程序中效果不好，主要是由于符号执行有严重的路径爆炸问题。</p>
+<p>定向灰盒测试，AFLGo是第一个。计算种子的trace到目标的距离，然后应用到能量调度模块，对离的近的种子赋予更大的能量（变异更多次）。Hawkeye在AFLGo的基础上进行改进，主要改了三个部分，距离增强的能量调度，种子选择，选择性的变异。AFLGo和Hawkeye把所有的基本块都考虑进来来计算距离。WindRanger侧重于那些阻止输入到达目标位置的基本块，来提高定向模糊测试的效率。另外，FuzzGuard利用深度学习来过滤不能到达目标的输入。</p>
+<p>此外，还有一些工作应用定向模糊测试到不同类型的目标点。Leopard使用程序指标来识别程序中的漏洞代码，并把他们设定为目标位置。Parmsan通过sanitizer插桩的位置来作为目标位置。Parmasan基于动态构造的CFG来计算距离。CAFL利用目标位置的顺序信息和数据条件来加强发现目标崩溃的能力。</p>
+<p>覆盖率引导的灰盒模糊测试（CGF）致力于让模糊测试覆盖更多的代码。AFL是经典的CGF，使用覆盖率来引导种子进化。为了提高CGF的覆盖率，一个研究方向是帮助CGF求解程序中的条件约束。混合测试（Hybrid fuzzing）结合CGF和符号执行去加强CGF里的约束求解能力。几个其他的工作采用轻量化的方法来帮助约束求解。Steelix使用轻量的静态分析和二进制插桩来获取比较过程的信息，能够帮助CGF探索那些被魔法字节比较的路径。Angora使用梯度下降的输入搜索来求解约束。Greyone使用污点分析和数据流特征来指导fuzzing的进化。FairFuzz识别并标记那些影响输入覆盖稀有分支的字节。除了这些针对分支的研究，也有一些工作优化种子调度，检查特定类型的漏洞，或者自动生成fuzz的harness。虽然，这些工作和windranger的目标不一致，但windranger也会从这些技术中受益（比如约束求解技术）</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>先看一个motivation example来了解deviation  basic block（DBB）的基本原理。DBB实际上就是开始偏离目标点的那个基本块。比如对于种子A来说，21：1这个点就是DBB。因为他的子节点是不可达的。同理，种子B的DBB就是20：2，种子C的是15：1。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017144152488.png" alt="image-20221017144152488"></p>
+<p>整体框架图如下所示，标有数字的是修改的地方。可以看到改了很多地方。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017111305498.png" alt="image-20221017111305498"></p>
+<h3 id="DBB识别"><a href="#DBB识别" class="headerlink" title="DBB识别"></a>DBB识别</h3><p>对于WindRanger来说，DBB是很重要的概念。首先，用静态分析找到潜在的DBB。然后，在fuzzing的过程中，WindRanger在执行路径中定位DBB，以及他们和潜在DBB的关系。</p>
+<p>潜在DBB的定义如下，简单来说就是满足两个条件：</p>
+<ul>
+<li>自身到目标存在可达路径</li>
+<li>子节点到目标不可达</li>
+</ul>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017151610389.png" alt="image-20221017151610389"></p>
+<p>种子的DBB的定义如下，也是满足两个条件：</p>
+<ul>
+<li>即在种子路径上，又在潜在DBB集合中的</li>
+<li>所有可达的后继节点没有被种子执行</li>
+</ul>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017152201494.png" alt="image-20221017152201494"></p>
+<h3 id="基于估算的污点分析"><a href="#基于估算的污点分析" class="headerlink" title="基于估算的污点分析"></a>基于估算的污点分析</h3><p>使用污点分析的目的是收集数据流信息，可以知道哪些字节会影响给定分支。然后数据流信息就存储在hashmap中，key是分支约束的基本块地址，值是影响分支约束的字节索引。下面的算法，展示了构造这样一个hashmap的过程。</p>
+<p>对于一个种子和它的执行路径，首先提取分支约束相关的变量。然后对这些变量进行字节级的变异。有了这些变异后的输入后，windranger检查每个提取的变量是否在变异后发生了变化。如果变量的值变化了，windranger就会更新哈希表，告诉它，这个变异位置的种子会影响变量。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017155609272.png" alt="image-20221017155609272"></p>
+<h3 id="种子距离计算"><a href="#种子距离计算" class="headerlink" title="种子距离计算"></a>种子距离计算</h3><p>种子计算距离公式如下，简单说就是只计算DBB到目标的距离。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017160401908.png" alt="image-20221017160401908"></p>
+<p>然而，这还不够，再加上数据流信息，距离的计算公式如下：新增的变量是用来判断通过该约束的难易度。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017160917285.png" alt="image-20221017160917285"></p>
+<p>难易度公式：有多少字节可以影响约束变量。越多就说明fuzzer需要满足的条件越多，也就越难。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017161118586.png" alt="image-20221017161118586"></p>
+<h3 id="数据流敏感变异"><a href="#数据流敏感变异" class="headerlink" title="数据流敏感变异"></a>数据流敏感变异</h3><p>如果在exploitation阶段，会将和DBB约束变量相关的输入字节当作是高优先级的字节。</p>
+<p>对于一个约束变量和它相关的输入字节，如果输入字节是连续的。Windranger就会检查变量和输入字节是否共享一个值。如果是的话，很有可能输入字节没有经过数据变换。这种情况下，就直接用比较指令的另外一个操作数来替代输入的相关字节。</p>
+<h3 id="种子选择"><a href="#种子选择" class="headerlink" title="种子选择"></a>种子选择</h3><p>在exploitation阶段，windranger保留一个高优先级的队列。对于每个DBB，windranger会找到覆盖这个DBB的种子们。然后，windranger基于距离升序将种子排序。并将这些种子放在favored队列，把剩下的种子放在less favored 队列。当要选择下一个种子进行变异的时候，有很高的概率选择favored队列里的。</p>
+<p>在exploration阶段，就和普通的CGF一样。选择那些能增加覆盖率的种子。</p>
+<p>至于能量调度，就和AFLGO一样，使用的是模拟退火算法，只不过种子距离不一样。</p>
+<h3 id="动态切换exploration和exploitation"><a href="#动态切换exploration和exploitation" class="headerlink" title="动态切换exploration和exploitation"></a>动态切换exploration和exploitation</h3><p>虽然DGF的目的是尽可能地快地到达目标，但是DGF仍然需要足够的覆盖率探索去避免陷入局部最优。AFLGO在这方面采取的策略是手动设定时间来区分exploration和exploitation阶段。这种方法需要对不同的程序有着很深的理解。为了解决这个问题，windranger采用动态切换的方式。</p>
+<p>具体来说，windranger保留所有的DBB，放在一个全局的集合中。在利用阶段，当集合中的所有DBB都利用的足够了，windranger切换到探索阶段。决定DBB是否利用足够了的指标是DBB被执行了多少次。具体的公式如下，T是fuzzing过程的基本块集合。DDB被执行的次数大于某个常数v乘以基本块里的最小执行次数就够了。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017165833265.png" alt="image-20221017165833265"></p>
+<p>至于探索阶段切换到利用阶段的话，如果windranger发现了新的DBB，就会切换到利用阶段。</p>
+<p>需要注意切换过程只在windranger完成变异后发生。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>主要包含两部分。静态分析器和动态的fuzzer。静态分析器部使用SVF构造过程间控制流图。主要写了900行的C&#x2F;C++代码。动态的fuzzer基于AFL，主要有1000行C代码。</p>
+<h2 id="实验结果及分析"><a href="#实验结果及分析" class="headerlink" title="实验结果及分析"></a>实验结果及分析</h2><p>实验方面主要针对以下四个问题：</p>
+<ul>
+<li>到达目标点的能力有多强？</li>
+<li>在复现目标漏洞方面的性能怎么样？</li>
+<li>每个组件对总体性能的影响如何？</li>
+<li>能否发现真实的漏洞？</li>
+</ul>
+<h3 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h3><p>使用以下三个benchmark：</p>
+<ul>
+<li>unibench：包含20个真实程序。从数据集中每个程序选4个目标，来评估不同技术到达目标的时间。</li>
+<li>AFLGo Test Suite是AFLGo挖到的0-day漏洞。这个数据集被用在很多工作里。</li>
+<li>Fuzzer Test Suite是Google提出的数据集。包含几个真实程序和漏洞信息，也广泛用在fuzzing的研究。</li>
+</ul>
+<p>对比的技术：</p>
+<ul>
+<li>AFLGo：目前最先进的定向模糊测试技术。其他的hawkeye，fuzzguard没开源。</li>
+<li>AFL：经典的覆盖率导向的模糊测试</li>
+<li>FairFuzz：选择这个是因为FairFuzz也使用了估计技术来收集污点信息构造fuzzing。</li>
+</ul>
+<p>评估指标：</p>
+<ul>
+<li>Time-To-Target：到达目标的时间。这个指标用来评估没有已知漏洞的benchmark上。</li>
+<li>Time-To-Exposure：触发目标漏洞的时间。用来评估有漏洞的benchmark。</li>
+</ul>
+<h3 id="RQ1：到达目标点的能力"><a href="#RQ1：到达目标点的能力" class="headerlink" title="RQ1：到达目标点的能力"></a>RQ1：到达目标点的能力</h3><p>现在暂时没有标准的数据集用来评估DGG到达目标的能力。为此，作者用unibench来构建评估TTT的数据集。</p>
+<ul>
+<li>对于每个程序，先用AFL跑24h，重复10次，在每次跑的时候，记录每个基本块第一次到达的时间。</li>
+<li>统计每个基本块的平均第一次到达时间。</li>
+<li>基于平均值，使用四个时间指标来选择基本块。</li>
+</ul>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017192625095.png" alt="image-20221017192625095"></p>
+<h3 id="RQ2-漏洞复现能力"><a href="#RQ2-漏洞复现能力" class="headerlink" title="RQ2 漏洞复现能力"></a>RQ2 漏洞复现能力</h3><p>作者发现在测试binutils的时候，冒出了很多其他的漏洞，但只有7个漏洞是用在实验里的。因此，作者用的是binutils 2.28，然后把对应的cve 反patch回去。就避免人工审计这些crash。这个思路其实被用在很多benchmark的构造上，比如magma，fixreverter。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017193237905.png" alt="image-20221017193237905"></p>
+<h3 id="RQ3-不同模块的影响"><a href="#RQ3-不同模块的影响" class="headerlink" title="RQ3 不同模块的影响"></a>RQ3 不同模块的影响</h3><p>作者把每个改的地方都关掉了，然后测试了下性能。发现各个模块都提高了10%左右的性能。</p>
+<p><img src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/image-20221017194153448.png" alt="image-20221017194153448"></p>
+<h2 id="论文总结"><a href="#论文总结" class="headerlink" title="论文总结"></a>论文总结</h2><p>文章的核心思想是deviation basic block，然后围绕其在fuzz上做了一系列的优化。</p>
+<h2 id="自己的感受"><a href="#自己的感受" class="headerlink" title="自己的感受"></a>自己的感受</h2><p>读完论文后，自己的想法</p>
+<ul>
+<li><p>time-to-target的benchmark的设计挺好的。没有数据集就自己造。</p>
+</li>
+<li><p>论文结构也很清晰明了，非常标准，感觉下次写论文的时候可以参考这篇论文写。</p>
+</li>
+<li><p>修改模糊测试的模块部分，也值得借鉴学习。</p>
+</li>
+<li><p>感谢作者开源了自己的工具，感觉能从代码中学习到不少东西。</p>
+</li>
+</ul>
+<p>论文有哪些优点和亮点<br>论文还有哪些问题没有解决</p>
+<p>测试的大型程序还不是很多，可以看看大型程序上的效果如何。</p>
+<p>有哪些启发，可以继续探索</p>
+<ul>
+<li>exploitation和exploration的切换在代码中是怎么实现的</li>
+<li>种子选择是怎么实现的</li>
+<li>执行路径分析</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/paper/" rel="tag"># paper</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/13/Multiple%20Targets%20Directed%20Greybox%20Fuzzing/" rel="prev" title="【论文笔记】Multiple Targets Directed Greybox Fuzzing">
+      <i class="fa fa-chevron-left"></i> 【论文笔记】Multiple Targets Directed Greybox Fuzzing
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/10/24/FishFuzz%20Throwing%20Larger%20Nets%20to%20Catch%20Deeper%20Bugs/" rel="next" title="【论文笔记】FishFuzz:Throwing Larger Nets to Catch Deeper Bugs">
+      【论文笔记】FishFuzz:Throwing Larger Nets to Catch Deeper Bugs <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WindRanger-A-Directed-Greybox-Fuzzer-driven-by-Deviation-Basic-Blocks"><span class="nav-number">1.</span> <span class="nav-text">WindRanger: A Directed Greybox Fuzzer driven by Deviation Basic Blocks</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">论文基本信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E6%A6%82%E8%BF%B0"><span class="nav-number">1.2.</span> <span class="nav-text">论文概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">研究背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.4.</span> <span class="nav-text">相关工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.5.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DBB%E8%AF%86%E5%88%AB"><span class="nav-number">1.5.1.</span> <span class="nav-text">DBB识别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E4%BC%B0%E7%AE%97%E7%9A%84%E6%B1%A1%E7%82%B9%E5%88%86%E6%9E%90"><span class="nav-number">1.5.2.</span> <span class="nav-text">基于估算的污点分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%8D%E5%AD%90%E8%B7%9D%E7%A6%BB%E8%AE%A1%E7%AE%97"><span class="nav-number">1.5.3.</span> <span class="nav-text">种子距离计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E6%95%8F%E6%84%9F%E5%8F%98%E5%BC%82"><span class="nav-number">1.5.4.</span> <span class="nav-text">数据流敏感变异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%8D%E5%AD%90%E9%80%89%E6%8B%A9"><span class="nav-number">1.5.5.</span> <span class="nav-text">种子选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%87%E6%8D%A2exploration%E5%92%8Cexploitation"><span class="nav-number">1.5.6.</span> <span class="nav-text">动态切换exploration和exploitation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.6.</span> <span class="nav-text">具体实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E5%8F%8A%E5%88%86%E6%9E%90"><span class="nav-number">1.7.</span> <span class="nav-text">实验结果及分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">1.7.1.</span> <span class="nav-text">数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ1%EF%BC%9A%E5%88%B0%E8%BE%BE%E7%9B%AE%E6%A0%87%E7%82%B9%E7%9A%84%E8%83%BD%E5%8A%9B"><span class="nav-number">1.7.2.</span> <span class="nav-text">RQ1：到达目标点的能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ2-%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E8%83%BD%E5%8A%9B"><span class="nav-number">1.7.3.</span> <span class="nav-text">RQ2 漏洞复现能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RQ3-%E4%B8%8D%E5%90%8C%E6%A8%A1%E5%9D%97%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">1.7.4.</span> <span class="nav-text">RQ3 不同模块的影响</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BA%E6%96%87%E6%80%BB%E7%BB%93"><span class="nav-number">1.8.</span> <span class="nav-text">论文总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%B7%B1%E7%9A%84%E6%84%9F%E5%8F%97"><span class="nav-number">1.9.</span> <span class="nav-text">自己的感受</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="iskindar"
+      src="https://csdn-imgsumbit.oss-cn-beijing.aliyuncs.com/img/20220530182402_fa7aa.jpeg">
+  <p class="site-author-name" itemprop="name">iskindar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iskindar" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iskindar" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:iskindar97@gmail.com" title="E-Mail → mailto:iskindar97@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">iskindar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/model/katou_01/katou_01.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>
